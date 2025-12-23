@@ -75,7 +75,10 @@ const spin = async () => {
     }
 
     if (!response.ok) {
-        throw new Error(data.detail || data.error || 'Unknown API Error');
+        const errorMsg = typeof data.detail === 'string' 
+            ? data.detail 
+            : (typeof data.detail === 'object' ? JSON.stringify(data.detail) : (data.error || 'Unknown API Error'));
+        throw new Error(errorMsg);
     }
     
     // 正常模式：更新游戏状态
@@ -84,8 +87,10 @@ const spin = async () => {
     gameState.lastWin = data.total_payout
     gameState.balance += data.balance_update
     
-    // 使用后端返回的权威 RTP
-    gameState.historyRtp = data.history_rtp
+    // 使用后端返回的权威 RTP，如果缺失则保留旧值
+    if (data.history_rtp !== undefined) {
+        gameState.historyRtp = data.history_rtp
+    }
     
     gameState.debugLog = data
     

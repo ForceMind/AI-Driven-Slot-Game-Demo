@@ -48,13 +48,13 @@ async def global_exception_handler(request: Request, exc: Exception):
             "winning_lines": [],
             "total_payout": 0,
             "is_win": False,
-            "reasoning": "Backend Crash",
+            "reasoning": f"Backend Error: {error_msg}",
             "balance_update": 0,
+            "history_rtp": 0.95, # 提供默认值防止前端状态破坏
             "raw_debug_info": {
                 "error": error_msg,
                 "trace": traceback.format_exc()
             },
-            # 兼容旧逻辑
             "detail": error_msg 
         }
     )
@@ -82,39 +82,26 @@ async def spin(req: SpinRequest):
         )
     except Exception as e:
         logger.error(f"LLM Client Failed: {e}")
-        # 主动抛出异常，触发 global_exception_handler
         raise e
 
     # 2. Extract Matrix
     matrix = llm_result.get("matrix", [])
     
-    # 如果是调试模式结果，直接返回，跳过校验
+    # 3. Validation & Normalization (Deterministic calculation)
+    real_payout, real_winning_lines, normalized_matrix = ShadowAccountant.calculate_payout(matrix, req.bet)
+
+    # 如果是调试模式结果，直接返回
     if req.config.debug_mode:
         return SpinResponse(
-            matrix=matrix if matrix else [["DEBUG"]*5]*3,
-            winning_lines=[],
-            total_payout=0,
-            is_win=False,
+            matrix=normalized_matrix,
+            winning_lines=real_winning_lines,
+            total_payout=real_payout,
+            is_win=real_payout > 0,
             reasoning=llm_result.get("reasoning", "Debug Mode"),
-            balance_update=0,
+            balance_update=real_payout - req.bet,
             history_rtp=current_history_rtp,
             raw_debug_info=llm_result.get("raw_debug_info")
         )
-
-    # 矩阵校验与补全
-    if not matrix or not isinstance(matrix, list) or len(matrix) < 3:
-         logger.error(f"Invalid Matrix structure from LLM: {matrix}")
-         matrix = [["L2"]*5]*3 # 兜底数据
-    else:
-        # 确保每一行都有 5 个元素
-        for i in range(3):
-            if i >= len(matrix):
-                matrix.append(["L2"]*5)
-            elif not isinstance(matrix[i], list) or len(matrix[i]) < 5:
-                matrix[i] = (list(matrix[i]) + ["L2"]*5)[:5] if isinstance(matrix[i], (list, tuple)) else ["L2"]*5
-
-    # 3. Validation (Deterministic calculation)
-    real_payout, real_winning_lines, normalized_matrix = ShadowAccountant.calculate_payout(matrix, req.bet)
     
     # 关键修复：如果 AI 瞎编了一个中奖金额，但实际矩阵没中奖，以实际计算为准
     # 并在日志中记录这种不一致
