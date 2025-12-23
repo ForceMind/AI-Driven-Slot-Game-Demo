@@ -28,19 +28,28 @@ def get_symbol_list_str():
     
     for symbol_id, s in symbols.items():
         if isinstance(s, dict):
-            name = s.get('name', 'Unknown')
             val = s.get('base_value', 0)
-            lines.append(f"  - ID {symbol_id} ({name}): {val}x multiplier")
+            lines.append(f"  - ID {symbol_id}: {val}x base value")
         else:
             lines.append(f"  - ID {symbol_id}: {s}")
+    return "\n".join(lines)
+
+def get_multipliers_str():
+    multipliers = GAME_CONFIG.get("multipliers", {})
+    lines = []
+    for count, mult in multipliers.items():
+        lines.append(f"  - {count}-of-a-kind: {mult}x multiplier")
     return "\n".join(lines)
 
 DEFAULT_SYSTEM_PROMPT = """
 You are the Slot Game Engine. 
 **Game Rules:**
 - Grid: 3x5.
-- Symbols & Paytable (5-of-a-kind match): 
+- Symbols Base Values: 
 {SYMBOL_LIST}
+- Paytable Multipliers:
+{MULTIPLIER_LIST}
+- Payout Formula: Bet * Base Value * Multiplier.
 - Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
 
 **Objective:**
@@ -95,6 +104,7 @@ class LLMClient:
         system_prompt = system_prompt.replace("{HISTORY_RTP}", str(history_rtp))
         system_prompt = system_prompt.replace("{GLOBAL_PL}", f"{global_pl:.2f}")
         system_prompt = system_prompt.replace("{SYMBOL_LIST}", get_symbol_list_str())
+        system_prompt = system_prompt.replace("{MULTIPLIER_LIST}", get_multipliers_str())
         system_prompt = system_prompt.replace("{RANDOM_SEED}", f"{time.time()}-{random.random()}")
             
         # 记录发送给 AI 的完整 Prompt

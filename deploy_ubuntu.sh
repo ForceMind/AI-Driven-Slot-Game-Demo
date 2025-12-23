@@ -54,13 +54,10 @@ echo ">>> [4/5] Starting Services with PM2..."
 cd $APP_DIR
 
 # Start Backend
-# We run uvicorn on a specific port
 pm2 delete ai-slot-backend 2>/dev/null || true
-pm2 start "cd backend && source venv/bin/activate && uvicorn app:app --host 0.0.0.0 --port $BACKEND_PORT" --name ai-slot-backend
+pm2 start backend/venv/bin/python --name ai-slot-backend --cwd backend -- -m uvicorn app:app --host 0.0.0.0 --port $BACKEND_PORT
 
-# Start Frontend (Serving static build or dev server?)
-# For production, we should serve the 'dist' folder.
-# We can use 'pm2 serve' for static files.
+# Start Frontend
 pm2 delete ai-slot-frontend 2>/dev/null || true
 pm2 serve frontend/dist $FRONTEND_PORT --name ai-slot-frontend --spa
 

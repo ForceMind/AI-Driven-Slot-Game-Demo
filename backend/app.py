@@ -114,7 +114,7 @@ async def spin(req: SpinRequest):
                 matrix[i] = (list(matrix[i]) + ["L2"]*5)[:5] if isinstance(matrix[i], (list, tuple)) else ["L2"]*5
 
     # 3. Validation (Deterministic calculation)
-    real_payout, real_winning_lines = ShadowAccountant.calculate_payout(matrix, req.bet)
+    real_payout, real_winning_lines, normalized_matrix = ShadowAccountant.calculate_payout(matrix, req.bet)
     
     # 关键修复：如果 AI 瞎编了一个中奖金额，但实际矩阵没中奖，以实际计算为准
     # 并在日志中记录这种不一致
@@ -142,7 +142,7 @@ async def spin(req: SpinRequest):
     logger.info(f"Spin Complete. Payout: {real_payout}. Latency: {latency:.2f}ms")
 
     return SpinResponse(
-        matrix=matrix,
+        matrix=normalized_matrix,
         winning_lines=real_winning_lines,
         total_payout=real_payout,
         is_win=real_payout > 0,

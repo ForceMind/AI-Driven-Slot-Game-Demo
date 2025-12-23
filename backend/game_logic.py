@@ -38,9 +38,10 @@ class ShadowAccountant:
         return "5"
 
     @staticmethod
-    def calculate_payout(matrix: List[List[Any]], bet: float) -> Tuple[float, List[WinningLine]]:
+    def calculate_payout(matrix: List[List[Any]], bet: float) -> Tuple[float, List[WinningLine], List[List[str]]]:
         """
         Validates the matrix and calculates the deterministic payout.
+        Returns (total_payout, winning_lines, normalized_matrix)
         """
         total_payout = 0.0
         winning_lines = []
@@ -55,7 +56,7 @@ class ShadowAccountant:
                     row.append(ShadowAccountant._normalize_symbol(symbol))
                 normalized_matrix.append(row)
         except (IndexError, TypeError):
-            return 0.0, []
+            return 0.0, [], [["5"]*5]*3
         
         # 2. 计算中奖
         for line_id, coords in LINES.items():
@@ -75,7 +76,7 @@ class ShadowAccountant:
                     symbol=SYMBOLS[symbol_id]["name"] # 返回名称供前端显示
                 ))
                 
-        return round(total_payout, 2), winning_lines
+        return round(total_payout, 2), winning_lines, normalized_matrix
 
     @staticmethod
     def _check_line_match(line: List[str]) -> Tuple[int, str]:
