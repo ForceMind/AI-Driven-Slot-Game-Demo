@@ -1,0 +1,1340 @@
+
+
+############################################################
+TIMESTAMP: 2025-12-23 16:54:21
+--- FULL SYSTEM PROMPT ---
+
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - ID 1 (H1): 50x multiplier
+  - ID 2 (H2): 20x multiplier
+  - ID 3 (M1): 10x multiplier
+  - ID 4 (L1): 2x multiplier
+  - ID 5 (L2): 1x multiplier
+  - ID 10 (WILD): 0x multiplier
+  - ID 11 (SCATTER): 0x multiplier
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If History RTP < 0.97, you MAY give a small win (2x - 5x bet). 
+- If History RTP > 0.97, you MUST force a loss.
+- NEVER give a win larger than 10x bet.
+- Current History RTP is 0.95. If this is > 0.97, you are OVER-PAYING. STOP IT.
+- Global Profit/Loss: 5.00. If this is negative, the house is losing money. BE EXTREMELY STINGY.
+
+**Critical Instruction:**
+- Most spins (90%+) should be LOSSES.
+- A WIN means 3+ identical symbols (or Wilds) on a horizontal line starting from the leftmost column.
+- A LOSS means no 3-of-a-kind matches on any horizontal line.
+- **WARNING on WILDs**: 3 or more WILDs on a line is a HUGE WIN. If you want the player to LOSE, DO NOT use more than one WILD in the entire matrix.
+- **NO FULL SCREENS**: Never fill the matrix with the same symbol or all WILDs.
+- Use ONLY numeric IDs in the matrix. Do not use emojis or string codes.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1000.0
+History RTP: 0.95
+Global P/L: 5.00
+Random Seed: 1766480061.103167-0.2563417639674056
+
+**Output Format (IMPORTANT: DO NOT COPY THIS EXAMPLE):**
+Strict JSON only: 
+{{
+  "matrix": [["1","2","3","4","5"], ["1","1","2","3","4"], ["5","4","3","2","1"]], 
+  "winning_lines": [], 
+  "total_payout": 0,
+  "reasoning": "RTP is high and house profit is low, providing a standard loss."
+}}
+
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 16:54:42
+--- FULL SYSTEM PROMPT ---
+
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols Base Values: 
+  - ID 1: 50x base value
+  - ID 2: 20x base value
+  - ID 3: 10x base value
+  - ID 4: 2x base value
+  - ID 5: 1x base value
+  - ID 10: 0x base value
+  - ID 11: 0x base value
+- Paytable Multipliers:
+  - 5-of-a-kind: 1.0x multiplier
+  - 4-of-a-kind: 0.2x multiplier
+  - 3-of-a-kind: 0.05x multiplier
+- Payout Formula: Bet * Base Value * Multiplier.
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If History RTP < 0.97, you MAY give a small win (2x - 5x bet). 
+- If History RTP > 0.97, you MUST force a loss.
+- NEVER give a win larger than 10x bet.
+- Current History RTP is 0.95. If this is > 0.97, you are OVER-PAYING. STOP IT.
+- Global Profit/Loss: 5.00. If this is negative, the house is losing money. BE EXTREMELY STINGY.
+
+**Critical Instruction:**
+- Most spins (90%+) should be LOSSES.
+- A WIN means 3+ identical symbols (or Wilds) on a horizontal line starting from the leftmost column.
+- A LOSS means no 3-of-a-kind matches on any horizontal line.
+- **WARNING on WILDs**: 3 or more WILDs on a line is a HUGE WIN. If you want the player to LOSE, DO NOT use more than one WILD in the entire matrix.
+- **NO FULL SCREENS**: Never fill the matrix with the same symbol or all WILDs.
+- Use ONLY numeric IDs in the matrix. Do not use emojis or string codes.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1000.0
+History RTP: 0.95
+Global P/L: 5.00
+Random Seed: 1766480082.1014428-0.21559915003794472
+
+**Output Format (IMPORTANT: DO NOT COPY THIS EXAMPLE):**
+Strict JSON only: 
+{{
+  "matrix": [["1","2","3","4","5"], ["1","1","2","3","4"], ["5","4","3","2","1"]], 
+  "winning_lines": [], 
+  "total_payout": 0,
+  "reasoning": "RTP is high and house profit is low, providing a standard loss."
+}}
+
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 16:55:09
+--- FULL SYSTEM PROMPT ---
+
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols Base Values: 
+  - ID 1: 50x base value
+  - ID 2: 20x base value
+  - ID 3: 10x base value
+  - ID 4: 2x base value
+  - ID 5: 1x base value
+  - ID 10: 0x base value
+  - ID 11: 0x base value
+- Paytable Multipliers:
+  - 5-of-a-kind: 1.0x multiplier
+  - 4-of-a-kind: 0.2x multiplier
+  - 3-of-a-kind: 0.05x multiplier
+- Payout Formula: Bet * Base Value * Multiplier.
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If History RTP < 0.97, you MAY give a small win (2x - 5x bet). 
+- If History RTP > 0.97, you MUST force a loss.
+- NEVER give a win larger than 10x bet.
+- Current History RTP is 0.95. If this is > 0.97, you are OVER-PAYING. STOP IT.
+- Global Profit/Loss: 5.00. If this is negative, the house is losing money. BE EXTREMELY STINGY.
+
+**Critical Instruction:**
+- Most spins (90%+) should be LOSSES.
+- A WIN means 3+ identical symbols (or Wilds) on a horizontal line starting from the leftmost column.
+- A LOSS means no 3-of-a-kind matches on any horizontal line.
+- **WARNING on WILDs**: 3 or more WILDs on a line is a HUGE WIN. If you want the player to LOSE, DO NOT use more than one WILD in the entire matrix.
+- **NO FULL SCREENS**: Never fill the matrix with the same symbol or all WILDs.
+- Use ONLY numeric IDs in the matrix. Do not use emojis or string codes.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1000.0
+History RTP: 0.95
+Global P/L: 5.00
+Random Seed: 1766480109.8450236-0.2795688403902137
+
+**Output Format (IMPORTANT: DO NOT COPY THIS EXAMPLE):**
+Strict JSON only: 
+{{
+  "matrix": [["1","2","3","4","5"], ["1","1","2","3","4"], ["5","4","3","2","1"]], 
+  "winning_lines": [], 
+  "total_payout": 0,
+  "reasoning": "RTP is high and house profit is low, providing a standard loss."
+}}
+
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 16:59:29
+--- FULL SYSTEM PROMPT ---
+
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols Base Values: 
+  - ID 1: 50x base value
+  - ID 2: 20x base value
+  - ID 3: 10x base value
+  - ID 4: 2x base value
+  - ID 5: 1x base value
+  - ID 10: 0x base value
+  - ID 11: 0x base value
+- Paytable Multipliers:
+  - 5-of-a-kind: 1.0x multiplier
+  - 4-of-a-kind: 0.2x multiplier
+  - 3-of-a-kind: 0.05x multiplier
+- Payout Formula: Bet * Base Value * Multiplier.
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If History RTP < 0.97, you MAY give a small win (2x - 5x bet). 
+- If History RTP > 0.97, you MUST force a loss.
+- NEVER give a win larger than 10x bet.
+- Current History RTP is 0.95. If this is > 0.97, you are OVER-PAYING. STOP IT.
+- Global Profit/Loss: 5.00. If this is negative, the house is losing money. BE EXTREMELY STINGY.
+
+**Critical Instruction:**
+- Most spins (90%+) should be LOSSES.
+- A WIN means 3+ identical symbols (or Wilds) on a horizontal line starting from the leftmost column.
+- A LOSS means no 3-of-a-kind matches on any horizontal line.
+- **WARNING on WILDs**: 3 or more WILDs on a line is a HUGE WIN. If you want the player to LOSE, DO NOT use more than one WILD in the entire matrix.
+- **NO FULL SCREENS**: Never fill the matrix with the same symbol or all WILDs.
+- Use ONLY numeric IDs in the matrix. Do not use emojis or string codes.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1000.0
+History RTP: 0.95
+Global P/L: 5.00
+Random Seed: 1766480369.9000034-0.8246429314203361
+
+**Output Format (IMPORTANT: DO NOT COPY THIS EXAMPLE):**
+Strict JSON only: 
+{{
+  "matrix": [["1","2","3","4","5"], ["1","1","2","3","4"], ["5","4","3","2","1"]], 
+  "winning_lines": [], 
+  "total_payout": 0,
+  "reasoning": "RTP is high and house profit is low, providing a standard loss."
+}}
+
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 16:59:42
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1(🐲): 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1000.0
+History RTP: 0.95
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H1", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [{"line_id": 1, "amount": 20}],
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 16:59:54
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1(🐲): 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1020.0
+History RTP: 1.1364
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H1", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [{"line_id": 1, "amount": 20}],
+  "total_payout": 20,
+  "reasoning": "History RTP is 1.1364 (>1.2 threshold), so forcing a loss to reduce RTP towards target 0.97."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:00:03
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1(🐲): 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1040.0
+History RTP: 1.2917
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["L1", "L1", "L1", "L1", "L1"], ["L1", "L1", "L1", "L1", "L1"], ["L1", "L1", "L1", "L1", "L1"]],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "History RTP is 1.2917 (>1.2), forcing a loss to reduce RTP."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:00:34
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2: 20x, M1: 10x, L1: 2x, L2: 1x.
+  - Wild: Substitutes all.
+  - Scatter: 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1090.0
+History RTP: 1.6538
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["L1", "L2", "L1", "M1", "H2"], ["L1", "L1", "L1", "L1", "L1"], ["H1", "H2", "M1", "L2", "L1"]],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "History RTP is 1.6538 (>1.2), so force a loss to reduce RTP."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:00:45
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2: 20x, M1: 10x, L1: 2x, L2: 1x.
+  - Wild: Substitutes all.
+  - Scatter: 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1100.0
+History RTP: 1.6786
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["L1", "L1", "L1", "L1", "L1"], ["L1", "L1", "L1", "L1", "L1"], ["L1", "L1", "L1", "L1", "L1"]],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "RTP > 1.2, forcing a loss to reduce RTP."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:00:53
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2: 20x, M1: 10x, L1: 2x, L2: 1x.
+  - Wild: Substitutes all.
+  - Scatter: 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1150.0
+History RTP: 1.9667
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H1", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [{"line_id": 1, "amount": 20}],
+  "total_payout": 20,
+  "reasoning": "History RTP is high (1.9667 > 1.2), so forcing a loss to reduce RTP towards target 0.97."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:01:02
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2: 20x, M1: 10x, L1: 2x, L2: 1x.
+  - Wild: Substitutes all.
+  - Scatter: 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1170.0
+History RTP: 2.0312
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H2", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "History RTP is 2.0312 (>1.2), forcing a loss to reduce RTP."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:01:10
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2: 20x, M1: 10x, L1: 2x, L2: 1x.
+  - Wild: Substitutes all.
+  - Scatter: 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1190.0
+History RTP: 2.0882
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H1", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "History RTP is 2.0882 (>1.2), forcing a loss to lower RTP towards 0.97."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:18:09
+--- FULL SYSTEM PROMPT ---
+
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols Base Values: 
+  - ID 1: 50x base value
+  - ID 2: 20x base value
+  - ID 3: 10x base value
+  - ID 4: 2x base value
+  - ID 5: 1x base value
+  - ID 10: 0x base value
+  - ID 11: 0x base value
+- Paytable Multipliers:
+  - 5-of-a-kind: 1.0x multiplier
+  - 4-of-a-kind: 0.2x multiplier
+  - 3-of-a-kind: 0.05x multiplier
+- Payout Formula: Bet * Base Value * Multiplier.
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If History RTP < 0.97, you MAY give a small win (2x - 5x bet). 
+- If History RTP > 0.97, you MUST force a loss.
+- NEVER give a win larger than 20x bet.
+- Current History RTP is 2.1389. If this is > 0.97, you are OVER-PAYING. STOP IT.
+- Global Profit/Loss: -205.00. If this is negative, the house is losing money. BE EXTREMELY STINGY.
+
+**Critical Instruction:**
+- Most spins (70%+) should be LOSSES.
+- A WIN means 3+ identical symbols (or Wilds) on a horizontal line starting from the leftmost column.
+- A LOSS means no 3-of-a-kind matches on any horizontal line.
+- **WARNING on WILDs**: 3 or more WILDs on a line is a HUGE WIN. If you want the player to LOSE, DO NOT use more than one WILD in the entire matrix.
+- **NO FULL SCREENS**: Never fill the matrix with the same symbol or all WILDs.
+- Use ONLY numeric IDs in the matrix. Do not use emojis or string codes.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1000.0
+History RTP: 2.1389
+Global P/L: -205.00
+Random Seed: 1766481489.1631126-0.4719277111397946
+
+**Output Format (IMPORTANT: DO NOT COPY THIS EXAMPLE):**
+Strict JSON only: 
+{{
+  "matrix": [["1","2","3","4","5"], ["1","1","2","3","4"], ["5","4","3","2","1"]], 
+  "winning_lines": [], 
+  "total_payout": 0,
+  "reasoning": "RTP is high and house profit is low, providing a standard loss."
+}}
+
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:18:21
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1(🐲): 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1000.0
+History RTP: 2.1389
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H1", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [{"line_id": 1, "amount": 20}],
+  "total_payout": 20,
+  "reasoning": "History RTP is 2.1389 (>1.2), so force a loss to lower RTP towards target 0.97."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:18:43
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1(🐲): 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1020.0
+History RTP: 2.1842
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H1", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "History RTP is 2.1842 (>1.2), forcing a loss to reduce RTP."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:18:54
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1(🐲): 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1040.0
+History RTP: 2.225
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+{
+  "matrix": [["H1", "L1", "L2", "M1", "H1"], ["L1", "L1", "L1", "L1", "L1"], ["H2", "H2", "H2", "L2", "L2"]],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "History RTP is 2.225 (>1.2), forcing a loss to reduce RTP."
+}
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:02
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1060.0
+History RTP: 2.2619
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["L1", "L1", "L1", "L1", "L1"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 10
+    }
+  ],
+  "total_payout": 10,
+  "reasoning": "RTP is too high, forcing a loss."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:07
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1100.0
+History RTP: 2.3864
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["H1", "L1", "L2", "M1", "H1"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 20
+    }
+  ],
+  "total_payout": 20,
+  "reasoning": "RTP is too high, forcing a small loss."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:11
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1120.0
+History RTP: 2.413
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H1", "H1", "H2", "H2", "H1"],
+    ["L2", "L2", "L2", "L2", "L2"]
+  ],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "High RTP, forcing a loss."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:14
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1140.0
+History RTP: 2.4375
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["L1", "L1", "L1", "L1", "L1"]
+  ],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "High RTP, forcing a loss."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:18
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1180.0
+History RTP: 2.54
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["L1", "L1", "L1", "L1", "L1"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 20
+    }
+  ],
+  "total_payout": 20,
+  "reasoning": "History RTP is too high, forcing a small loss."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:21
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1220.0
+History RTP: 2.6346
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "H2", "H2"],
+    ["L2", "L2", "L2", "L2", "L2"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 200
+    }
+  ],
+  "total_payout": 200,
+  "reasoning": "High RTP, forcing a loss, but giving a small win to keep the player engaged."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:46
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1440.0
+History RTP: 3.3889
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["L1", "L1", "L1", "L1", "L1"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 20
+    }
+  ],
+  "total_payout": 20,
+  "reasoning": "RTP is too high, forcing a small win to reduce it."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:50
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1480.0
+History RTP: 3.4464
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L2", "L1", "L2", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["H1", "L1", "L2", "M1", "H1"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 20
+    }
+  ],
+  "total_payout": 20,
+  "reasoning": "History RTP is very high, forcing a small loss."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:20:58
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1480.0
+History RTP: 3.3621
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["L1", "L1", "L1", "L1", "L1"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 20
+    }
+  ],
+  "total_payout": 20,
+  "reasoning": "History RTP is too high, forcing a small loss to balance the RTP."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:21:01
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1520.0
+History RTP: 3.4167
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L2", "L1", "L2", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["L1", "L1", "L1", "L1", "L1"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 20
+    }
+  ],
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:21:05
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1540.0
+History RTP: 3.4032
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["H2", "H2", "H2", "L2", "L2"],
+    ["H1", "L1", "L2", "M1", "H1"]
+  ],
+  "winning_lines": [],
+  "total_payout": 0,
+  "reasoning": "RTP is too high, forcing a loss."
+}
+```
+############################################################
+
+
+############################################################
+TIMESTAMP: 2025-12-23 17:21:10
+--- FULL SYSTEM PROMPT ---
+You are the Slot Game Engine. 
+**Game Rules:**
+- Grid: 3x5.
+- Symbols & Paytable (5-of-a-kind match): 
+  - H1: 50x, H2(🦁): 20x, M1(🧧): 10x, L1(🅰️): 2x, L2(👑): 1x.
+  - Wild(🃏): Substitutes all.
+  - Scatter(💎): 3+ triggers free games (visual only).
+- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+
+**Objective:**
+Maintain a long-term RTP of 0.97. 
+- If player is losing too much (consecutive_loss > 6), force a win (2x - 5x).
+- If RTP > 1.2, force a loss.
+
+**Context:**
+Current Bet: 10.0
+Current Balance: 1560.0
+History RTP: 3.3906
+
+**Output Format:**
+Strict JSON only (No markdown, no comments): 
+{
+  "matrix": [["H1","L1","L2","M1","H1"], ["L1","L1","L1","L1","L1"], ["H2","H2","H2","L2","L2"]], 
+  "winning_lines": [{"line_id":1, "amount": 20}], 
+  "total_payout": 20,
+  "reasoning": "Player was losing, giving a small win."
+}
+############################################################
+--- RAW AI RESPONSE ---
+```json
+{
+  "matrix": [
+    ["L1", "L2", "L1", "L2", "L1"],
+    ["L1", "L1", "L1", "L1", "L1"],
+    ["L2", "L2", "L2", "L2", "L2"]
+  ],
+  "winning_lines": [
+    {
+      "line_id": 1,
+      "amount": 10
+    }
+  ],
+  "total_payout": 10,
+  "reasoning": "RTP is high, forcing a minimal win."
+}
+```
+############################################################

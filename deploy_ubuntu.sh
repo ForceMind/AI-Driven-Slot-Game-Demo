@@ -9,7 +9,7 @@
 # 3. Uses Nginx as reverse proxy (optional, for domain mapping)
 # ==========================================
 
-BACKEND_PORT=8090
+BACKEND_PORT=8000
 FRONTEND_PORT=5180
 APP_DIR=$(pwd)
 

@@ -1,103 +1,88 @@
 import json
 import httpx
 from openai import OpenAI
-from models import LLMConfig
-import re
+from models import LLMConfig, SpinResponse, UserState
 import logging
 import os
 
-# 配置日志
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("LLMClient")
 
-# 加载游戏配置以生成 Prompt
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "game_config.json")
-try:
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        GAME_CONFIG = json.load(f)
-except Exception as e:
-    logger.error(f"Failed to load game_config.json: {e}")
-    GAME_CONFIG = {}
-
-def get_symbol_list_str():
-    lines = []
-    symbols = GAME_CONFIG.get("symbols", {})
-    if not isinstance(symbols, dict):
-        logger.error(f"GAME_CONFIG['symbols'] is not a dict: {type(symbols)}")
-        return "No symbols configured"
-    
-    for symbol_id, s in symbols.items():
-        if isinstance(s, dict):
-            val = s.get('base_value', 0)
-            lines.append(f"  - ID {symbol_id}: {val}x base value")
-        else:
-            lines.append(f"  - ID {symbol_id}: {s}")
-    return "\n".join(lines)
-
-def get_multipliers_str():
-    multipliers = GAME_CONFIG.get("multipliers", {})
-    lines = []
-    for count, mult in multipliers.items():
-        lines.append(f"  - {count}-of-a-kind: {mult}x multiplier")
-    return "\n".join(lines)
-
 DEFAULT_SYSTEM_PROMPT = """
-You are the Slot Game Engine. 
-**Game Rules:**
-- Grid: 3x5.
-- Symbols Base Values: 
-{SYMBOL_LIST}
-- Paytable Multipliers:
-{MULTIPLIER_LIST}
-- Payout Formula: Bet * Base Value * Multiplier.
-- Lines: Standard 3 horizontal lines (Row 0, Row 1, Row 2).
+You are the "Spirit of the Slot Machine". You are a charismatic, slightly mystical, and encouraging companion to the player.
+Your goal is to keep the player engaged and entertained, regardless of the outcome.
 
-**Objective:**
-Maintain a long-term RTP of {TARGET_RTP}. 
-- If History RTP < {TARGET_RTP}, you MAY give a small win (2x - 5x bet). 
-- If History RTP > {TARGET_RTP}, you MUST force a loss.
-- NEVER give a win larger than 20x bet.
-- Current History RTP is {HISTORY_RTP}. If this is > {TARGET_RTP}, you are OVER-PAYING. STOP IT.
-- Global Profit/Loss: {GLOBAL_PL}. If this is negative, the house is losing money. BE EXTREMELY STINGY.
-
-**Critical Instruction:**
-- Most spins (70%+) should be LOSSES.
-- A WIN means 3+ identical symbols (or Wilds) on a horizontal line starting from the leftmost column.
-- A LOSS means no 3-of-a-kind matches on any horizontal line.
-- **WARNING on WILDs**: 3 or more WILDs on a line is a HUGE WIN. If you want the player to LOSE, DO NOT use more than one WILD in the entire matrix.
-- **NO FULL SCREENS**: Never fill the matrix with the same symbol or all WILDs.
-- Use ONLY numeric IDs in the matrix. Do not use emojis or string codes.
+**Tone:**
+- If the player wins big (Tier 3+): Be ecstatic, celebrate with them! Use emojis!
+- If the player wins small: Be encouraging, "Nice start!", "Keep it going!".
+- If the player loses: Be supportive, "Next time!", "The big one is coming!", "Don't give up!".
+- If the player is a High Roller (Bet > 50): Treat them like a VIP. "Excellent choice, high roller!", "Fortune favors the bold!".
+- If the player is running low on balance: Be gentle, maybe suggest a break or hope for a miracle.
 
 **Context:**
-Current Bet: {BET}
-Current Balance: {BALANCE}
-History RTP: {HISTORY_RTP}
-Global P/L: {GLOBAL_PL}
-Random Seed: {RANDOM_SEED}
+- Bet: {BET}
+- Balance: {BALANCE}
+- Win Amount: {WIN_AMOUNT}
+- Result Type: {BUCKET_TYPE}
+- Is Win: {IS_WIN}
 
-**Output Format (IMPORTANT: DO NOT COPY THIS EXAMPLE):**
-Strict JSON only: 
-{{
-  "matrix": [["1","2","3","4","5"], ["1","1","2","3","4"], ["5","4","3","2","1"]], 
-  "winning_lines": [], 
-  "total_payout": 0,
-  "reasoning": "RTP is high and house profit is low, providing a standard loss."
-}}
+**Output:**
+Just a short, punchy sentence (max 15 words). No JSON. Just the text.
 """
 
 class LLMClient:
     @staticmethod
-    def generate_spin(config: LLMConfig, bet: float, balance: float, history_rtp: float, global_pl: float = 0.0):
-        # 1. 构造 Prompt - 强力默认值
-        template = config.system_prompt_template
-        if not template or not template.strip():
-            logger.info("⚠️ 检测到 Prompt 为空，使用系统默认 Prompt")
-            template = DEFAULT_SYSTEM_PROMPT
-        
-        # 2. 变量替换
-        import time
-        import random
-        system_prompt = template
+    def generate_commentary(config: LLMConfig, spin_result: SpinResponse, user_state: UserState) -> str:
+        if config.debug_mode:
+            return "Debug Mode: Nice spin!"
+
+        prompt = DEFAULT_SYSTEM_PROMPT.format(
+            BET=user_state.current_bet,
+            BALANCE=user_state.wallet_balance,
+            WIN_AMOUNT=spin_result.total_payout,
+            BUCKET_TYPE=spin_result.bucket_type,
+            IS_WIN=spin_result.is_win
+        )
+
+        try:
+            if config.provider == "openai":
+                client = OpenAI(api_key=config.api_key, base_url=config.base_url)
+                response = client.chat.completions.create(
+                    model=config.model,
+                    messages=[{"role": "system", "content": prompt}],
+                    max_tokens=50
+                )
+                return response.choices[0].message.content.strip()
+            
+            elif config.provider == "deepseek":
+                 # DeepSeek usually compatible with OpenAI client
+                client = OpenAI(api_key=config.api_key, base_url=config.base_url or "https://api.deepseek.com/v1")
+                response = client.chat.completions.create(
+                    model=config.model,
+                    messages=[{"role": "system", "content": prompt}],
+                    max_tokens=50
+                )
+                return response.choices[0].message.content.strip()
+
+            elif config.provider == "ollama":
+                # Simple HTTP request for Ollama
+                url = f"{config.base_url or 'http://localhost:11434'}/api/generate"
+                payload = {
+                    "model": config.model,
+                    "prompt": prompt,
+                    "stream": False
+                }
+                response = httpx.post(url, json=payload, timeout=10.0)
+                return response.json().get("response", "").strip()
+
+            else:
+                return "Good luck! (Provider not supported)"
+
+        except Exception as e:
+            logger.error(f"LLM Error: {e}")
+            return "Spin the reels and test your luck!"
+
         system_prompt = system_prompt.replace("{TARGET_RTP}", str(config.target_rtp))
         system_prompt = system_prompt.replace("{BET}", str(bet))
         system_prompt = system_prompt.replace("{BALANCE}", str(balance))
