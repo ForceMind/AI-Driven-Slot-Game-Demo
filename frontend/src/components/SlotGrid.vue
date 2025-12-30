@@ -14,7 +14,11 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  isSpinning: Boolean
+  isSpinning: Boolean,
+  linesConfig: {
+    type: Object,
+    default: () => ({})
+  }
 })
 
 const symbolMap = {
@@ -33,15 +37,16 @@ const getSymbol = (code) => symbolMap[code] || code
 const isWinningCell = (row, col) => {
   if (!props.winningLines || !props.winningLines.length) return false
   
-  // Line definitions (Must match backend config.json)
-  // Backend uses 0-based index for line IDs in config.json keys ("0", "1"...)
-  const LINES = {
-    0: [[0,0], [0,1], [0,2], [0,3], [0,4]], // Top
-    1: [[1,0], [1,1], [1,2], [1,3], [1,4]], // Middle
-    2: [[2,0], [2,1], [2,2], [2,3], [2,4]], // Bottom
-    3: [[0,0], [1,1], [2,2], [1,3], [0,4]], // V
-    4: [[2,0], [1,1], [0,2], [1,3], [2,4]]  // Inverted V
-  }
+  // Use linesConfig from props, fallback to hardcoded if empty
+  const LINES = (props.linesConfig && Object.keys(props.linesConfig).length > 0) 
+    ? props.linesConfig 
+    : {
+        0: [[0,0], [0,1], [0,2], [0,3], [0,4]], // Top
+        1: [[1,0], [1,1], [1,2], [1,3], [1,4]], // Middle
+        2: [[2,0], [2,1], [2,2], [2,3], [2,4]], // Bottom
+        3: [[0,0], [1,1], [2,2], [1,3], [0,4]], // V
+        4: [[2,0], [1,1], [0,2], [1,3], [2,4]]  // Inverted V
+      }
 
   return props.winningLines.some(line => {
     const coords = LINES[line.line_id]

@@ -374,6 +374,7 @@ onMounted(() => {
                     :matrix="gameState.matrix" 
                     :winning-lines="gameState.winningLines"
                     :is-spinning="isSpinning"
+                    :lines-config="config?.lines"
                 />
             </div>
             
@@ -409,34 +410,36 @@ onMounted(() => {
         </div>
 
         <!-- Controls -->
-        <div class="flex gap-4 items-center">
-            <div class="flex items-center bg-slate-900 rounded-lg p-2 gap-4">
-                <button @click="changeBet(-1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700">-</button>
-                <div class="text-center w-20">
+        <div class="flex flex-col md:flex-row gap-4 items-center w-full max-w-md z-10">
+            <div class="flex items-center justify-between bg-slate-900 rounded-lg p-2 gap-4 w-full md:w-auto">
+                <button @click="changeBet(-1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">-</button>
+                <div class="text-center flex-1 md:w-20">
                     <div class="text-xs text-slate-500">下注 (BET)</div>
                     <div class="font-bold">🪙 {{ gameState.bet }}</div>
                 </div>
-                <button @click="changeBet(1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700">+</button>
+                <button @click="changeBet(1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">+</button>
             </div>
             
-            <!-- Fixed width to prevent jumping -->
-            <button @click="spin" :disabled="isSpinning" 
-                    class="w-48 h-16 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-xl disabled:opacity-50 flex items-center justify-center transition-colors">
-                {{ isSpinning ? '旋转中...' : '旋转 (SPIN)' }}
-            </button>
+            <div class="flex gap-2 w-full md:w-auto">
+                <!-- Fixed width to prevent jumping -->
+                <button @click="spin" :disabled="isSpinning" 
+                        class="flex-1 md:w-48 h-16 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-xl disabled:opacity-50 flex items-center justify-center transition-colors">
+                    {{ isSpinning ? '...' : '旋转 (SPIN)' }}
+                </button>
 
-            <!-- Refill Button -->
-            <button @click="topUpBalance" class="w-10 h-10 bg-green-600 hover:bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg" title="充值 (Top Up)">
-                +
-            </button>
+                <!-- Refill Button -->
+                <button @click="topUpBalance" class="w-16 md:w-10 h-16 md:h-10 bg-green-600 hover:bg-green-500 text-white rounded-xl md:rounded-full flex items-center justify-center shadow-lg flex-shrink-0" title="充值 (Top Up)">
+                    +
+                </button>
+            </div>
         </div>
 
         <!-- Debug/Config -->
-        <div class="flex gap-4 text-sm text-slate-500">
+        <div class="flex flex-wrap justify-center gap-4 text-xs md:text-sm text-slate-500 pb-8">
             <button @click="showConfig = true" class="hover:text-white underline">配置 (Config)</button>
             <button @click="showSim = true" class="hover:text-white underline">快速模拟 (Simulate)</button>
             <button @click="resetUser" class="hover:text-white underline">重置用户 (Reset)</button>
-            <span class="ml-4">Bucket: {{ gameState.bucket }}</span>
+            <span class="ml-4 hidden md:inline">Bucket: {{ gameState.bucket }}</span>
         </div>
 
         <!-- Config Modal -->
@@ -544,7 +547,7 @@ onMounted(() => {
                             <!-- Legend -->
                             <div class="absolute top-2 right-2 text-xs text-slate-500 flex gap-2 bg-slate-900/80 p-1 rounded">
                                 <span class="text-green-400 font-bold">Balance</span>
-                                <span class="text-blue-400 font-bold">RTP (Max 200%)</span>
+                                <span class="text-blue-400 font-bold">RTP</span>
                             </div>
                         </div>
                     </div>

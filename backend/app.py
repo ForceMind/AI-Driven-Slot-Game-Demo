@@ -224,7 +224,10 @@ async def simulate(params: dict = Body(...), session: SessionData = Depends(get_
     if count > 10000: count = 10000
     bet = params.get("bet", 10)
     
-    initial_balance = 1000
+    # 理论上模拟需要足够的本金来支撑所有旋转
+    # 如果本金太少，会触发 "Max Win Ratio" 限制，导致大奖被过滤，从而拉低 RTP
+    # 因此我们将初始余额设置为：旋转次数 * 单次下注
+    initial_balance = count * bet
     current_balance = initial_balance
     max_balance = current_balance
     
