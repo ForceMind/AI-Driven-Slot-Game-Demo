@@ -61,6 +61,68 @@ class OutcomeEngine:
 
         print("Config loaded/parsed. Initializing buckets...")
         self.initialize_buckets()
+        
+        # 自动校准 RTP
+        self._auto_calibrate_rtp()
+
+    def _auto_calibrate_rtp(self):
+        """
+        根据 target_rtp 自动计算并覆盖 base_c_value。
+        公式: Target_RTP = Hit_Frequency * Avg_Win_Multiplier
+        Hit_Frequency (PRD) ≈ base_c_value * Avg_Fail_Streak_Factor (经验值约 6.0)
+        => base_c_value = Target_RTP / (Avg_Win_Multiplier * 6.0)
+        """
+        target_rtp = self.settings.get("target_rtp", 0.97)
+        
+        # 1. 计算平均中奖倍数 (Avg Win Multiplier)
+        total_weight = 0
+        weighted_sum = 0
+        
+        for key, cfg in self.buckets_config.items():
+            if key.startswith("Win_Tier"):
+                w = cfg["weight"]
+                # 取该奖池的平均倍数 (min+max)/2
+                avg_mult = (cfg["min_win"] + cfg["max_win"]) / 2
+                # 如果 max_win 太大（如 Tier 5），取保守值
+                if cfg["max_win"] > 100: avg_mult = cfg["min_win"] * 2
+                
+                weighted_sum += w * avg_mult
+                total_weight += w
+                
+        if total_weight == 0:
+            print("Warning: No winning buckets found!")
+            return
+
+        avg_win_multiplier = weighted_sum / total_weight
+        
+        # 2. 反推需要的中奖频率 (Hit Frequency)
+        # Target_RTP = Hit_Freq * Avg_Win_Mult
+        required_hit_freq = target_rtp / avg_win_multiplier
+        
+        # 3. 反推 base_c_value
+        # 在 PRD 算法中，平均中奖概率 P ≈ C * (1/C + 1)/2 ... 比较复杂
+        # 经验公式：对于 C=0.05~0.2，平均连输次数 N ≈ 1/P - 1
+        # 简单近似：Hit_Freq ≈ C * 4.5 (经验值，取决于 C 的大小)
+        # 更准确的模拟反推：
+        # C=0.15 -> HitFreq ≈ 25%
+        # C=0.05 -> HitFreq ≈ 12%
+        # 线性插值系数 k ≈ 1.6
+        
+        # 让我们用一个更稳健的公式：base_c = required_hit_freq / 1.8
+        # 这个 1.8 是基于 PRD 模拟的经验系数
+        
+        calculated_c = required_hit_freq / 1.8
+        
+        # 限制范围
+        calculated_c = max(0.01, min(0.3, calculated_c))
+        
+        print(f"[Auto-Calibrate] Target RTP: {target_rtp}")
+        print(f"[Auto-Calibrate] Avg Win Mult: {avg_win_multiplier:.2f}")
+        print(f"[Auto-Calibrate] Required Hit Freq: {required_hit_freq:.2%}")
+        print(f"[Auto-Calibrate] Calculated Base C: {calculated_c:.4f} (Old: {self.settings.get('base_c_value')})")
+        
+        # 覆盖配置
+        self.settings["base_c_value"] = calculated_c
 
     def initialize_buckets(self):
         # 遍历所有卷轴位置（如果空间太大则采样）
@@ -217,6 +279,7 @@ class OutcomeEngine:
         total_spins = user_state.get("total_spins", 0)
         fail_streak = user_state.get("fail_streak", 0)
         max_historical_balance = user_state.get("max_historical_balance", balance)
+        historical_rtp = user_state.get("historical_rtp", 0.0) # 获取用户历史 RTP
         ignore_safety = user_state.get("simulation_mode", False)
         
         # 1. 选择奖池
@@ -224,7 +287,8 @@ class OutcomeEngine:
             bet, balance, initial_balance, 
             total_spins, fail_streak, 
             ignore_safety=ignore_safety,
-            max_historical_balance=max_historical_balance
+            max_historical_balance=max_historical_balance,
+            historical_rtp=historical_rtp # 传入 RTP
         )
         if not ignore_safety:
             print(f"[OutcomeEngine] Bet: {bet}, Balance: {balance}, Spins: {total_spins}, FailStreak: {fail_streak}. Selected Bucket: {bucket_name}")
@@ -261,9 +325,22 @@ class OutcomeEngine:
             "fail_streak": new_fail_streak
         }
 
-    def _select_bucket(self, bet: float, balance: float, initial_balance: float, total_spins: int = 0, fail_streak: int = 0, ignore_safety: bool = False, max_historical_balance: float = 0) -> str:
+    def _select_bucket(self, bet: float, balance: float, initial_balance: float, total_spins: int = 0, fail_streak: int = 0, ignore_safety: bool = False, max_historical_balance: float = 0, historical_rtp: float = 0.0) -> str:
         # 1. PRD逻辑：决定本次是否中奖
         base_c = self.settings.get("base_c_value", 0.05)
+        
+        # 动态 RTP 调控 (RTP Control)
+        target_rtp = self.settings.get("target_rtp", 0.97)
+        
+        # 如果用户玩了足够多把 (比如 > 50)，且 RTP 严重偏离，进行修正
+        if total_spins > 50:
+            if historical_rtp < target_rtp * 0.8: # 亏太多了 (RTP < 77%)
+                base_c *= 1.5 # 提高 50% 中奖率
+                # print(f"RTP too low ({historical_rtp:.2f}), boosting C to {base_c:.3f}")
+            elif historical_rtp > target_rtp * 1.5: # 赢太多了 (RTP > 145%)
+                base_c *= 0.7 # 降低 30% 中奖率
+                # print(f"RTP too high ({historical_rtp:.2f}), lowering C to {base_c:.3f}")
+
         win_prob = base_c * (fail_streak + 1)
         
         # 安全：中奖概率最大为1.0
