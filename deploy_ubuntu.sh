@@ -36,7 +36,19 @@ echo ">>> 安装 Python 依赖..."
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+# 确保 uvicorn 已安装
+pip install uvicorn
 deactivate
+
+# 检查配置文件
+if [ ! -f "game_config_v2.json" ]; then
+    if [ -f "game_config.json" ]; then
+        echo ">>> 复制 game_config.json 到 game_config_v2.json..."
+        cp game_config.json game_config_v2.json
+    else
+        echo ">>> 警告: 未找到 game_config_v2.json 或 game_config.json，后端可能无法启动！"
+    fi
+fi
 
 # 3. 前端准备
 echo ">>> 设置前端项目..."
@@ -115,6 +127,15 @@ fi
 
 echo ">>> 重启 Nginx..."
 sudo systemctl restart nginx
+
+echo ">>> 等待后端服务启动 (10秒)..."
+sleep 10
+if curl -s http://127.0.0.1:8000/docs > /dev/null; then
+    echo ">>> 后端服务启动成功！"
+else
+    echo ">>> 警告: 后端服务似乎未正常响应。请检查日志："
+    echo ">>> sudo journalctl -u $SERVICE_NAME -n 50"
+fi
 
 echo ">>> 部署完成！"
 echo ">>> 后端已在 8000 端口运行（systemd 服务: $SERVICE_NAME）"

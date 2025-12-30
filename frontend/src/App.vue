@@ -104,6 +104,13 @@ const spin = async () => {
                 }
             })
         })
+        
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await res.text();
+            throw new Error(`Server returned non-JSON response: ${res.status} ${res.statusText}. Body preview: ${text.substring(0, 100)}...`);
+        }
+
         const data = await res.json()
         
         if (data.detail) {
