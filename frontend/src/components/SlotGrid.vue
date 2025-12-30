@@ -33,26 +33,22 @@ const getSymbol = (code) => symbolMap[code] || code
 const isWinningCell = (row, col) => {
   if (!props.winningLines || !props.winningLines.length) return false
   
-  // Updated Line Definitions to match backend
+  // Line definitions (Must match backend config.json)
+  // Backend uses 0-based index for line IDs in config.json keys ("0", "1"...)
   const LINES = {
-    0: [[0,0], [0,1], [0,2], [0,3], [0,4]],
-    1: [[1,0], [1,1], [1,2], [1,3], [1,4]],
-    2: [[2,0], [2,1], [2,2], [2,3], [2,4]],
-    3: [[0,0], [1,1], [2,2], [1,3], [0,4]],
-    4: [[2,0], [1,1], [0,2], [1,3], [2,4]]
+    0: [[0,0], [0,1], [0,2], [0,3], [0,4]], // Top
+    1: [[1,0], [1,1], [1,2], [1,3], [1,4]], // Middle
+    2: [[2,0], [2,1], [2,2], [2,3], [2,4]], // Bottom
+    3: [[0,0], [1,1], [2,2], [1,3], [0,4]], // V
+    4: [[2,0], [1,1], [0,2], [1,3], [2,4]]  // Inverted V
   }
 
   return props.winningLines.some(line => {
     const coords = LINES[line.line_id]
     if (!coords) return false
     
-    // Check if this cell is part of the winning line
-    // Note: In a real slot, we'd also check if it's part of the *matched* segment (e.g. first 3 symbols)
-    // But for visual simplicity, we highlight the whole line definition if it won.
-    // Better: The backend should return the exact winning coordinates.
-    // For now, we highlight the first 'count' symbols of the line.
-    
-    const count = line.count || 5 // Default to 5 if not provided
+    // Highlight only the symbols that contributed to the win
+    const count = line.count || 3
     const winningSegment = coords.slice(0, count)
     
     return winningSegment.some(([r, c]) => r === row && c === col)

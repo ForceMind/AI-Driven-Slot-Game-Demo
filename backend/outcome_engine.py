@@ -30,6 +30,17 @@ class OutcomeEngine:
         self.pay_table = self.config["pay_table"]
         self.lines = self.config["lines"]
         self.buckets_config = self.config["buckets"]
+        
+        # Normalize buckets config (handle min/max vs min_win/max_win)
+        for key, cfg in self.buckets_config.items():
+            if "min" in cfg and "min_win" not in cfg:
+                cfg["min_win"] = cfg["min"]
+            if "max" in cfg and "max_win" not in cfg:
+                cfg["max_win"] = cfg["max"]
+            # Ensure defaults
+            if "min_win" not in cfg: cfg["min_win"] = 0
+            if "max_win" not in cfg: cfg["max_win"] = 0
+
         self.settings = self.config["settings"]
         
         # Initialize buckets
@@ -191,11 +202,21 @@ class OutcomeEngine:
 
         bet = user_state.get("current_bet", 10.0)
         balance = user_state.get("wallet_balance", 1000.0)
-        max_hist_bal = user_state.get("max_historical_balance", 1000.0)
+        initial_balance = user_state.get("initial_balance", 1000.0)
+        total_spins = user_state.get("total_spins", 0)
+        fail_streak = user_state.get("fail_streak", 0)
+        max_historical_balance = user_state.get("max_historical_balance", balance)
+        ignore_safety = user_state.get("simulation_mode", False)
         
         # 1. Select Bucket
-        bucket_name = self._select_bucket(bet, balance, max_hist_bal)
-        print(f"[OutcomeEngine] Bet: {bet}, Balance: {balance}. Selected Bucket: {bucket_name}")
+        bucket_name = self._select_bucket(
+            bet, balance, initial_balance, 
+            total_spins, fail_streak, 
+            ignore_safety=ignore_safety,
+            max_historical_balance=max_historical_balance
+        )
+        if not ignore_safety:
+            print(f"[OutcomeEngine] Bet: {bet}, Balance: {balance}, Spins: {total_spins}, FailStreak: {fail_streak}. Selected Bucket: {bucket_name}")
         
         # 2. Pick Outcome from Bucket
         if not self.buckets[bucket_name]:
@@ -216,45 +237,88 @@ class OutcomeEngine:
         for wl in winning_lines:
             wl.amount = wl.amount * bet
             
+        # Update fail_streak
+        new_fail_streak = 0 if total_payout > 0 else fail_streak + 1
+            
         return {
             "matrix": matrix,
             "winning_lines": winning_lines,
             "total_payout": total_payout,
             "is_win": total_payout > 0,
             "bucket_type": bucket_name,
-            "balance_update": total_payout - bet
+            "balance_update": total_payout - bet,
+            "fail_streak": new_fail_streak
         }
 
-    def _select_bucket(self, bet: float, balance: float, max_hist_bal: float) -> str:
-        # Logic:
-        # 1. Filter available buckets based on High Roller Threshold
-        # 2. Apply RTP Safety Cap
-        # 3. Weighted Random Selection
+    def _select_bucket(self, bet: float, balance: float, initial_balance: float, total_spins: int = 0, fail_streak: int = 0, ignore_safety: bool = False, max_historical_balance: float = 0) -> str:
+        # 1. PRD Logic: Determine if this spin should be a WIN or LOSS
+        base_c = self.settings.get("base_c_value", 0.05)
+        win_prob = base_c * (fail_streak + 1)
         
-        available_buckets = list(self.buckets_config.keys())
+        # Safety: Cap win_prob at 1.0
+        if win_prob > 1.0: win_prob = 1.0
+        
+        is_prd_win = random.random() < win_prob
+        
+        # 2. Filter available buckets
         weights = {k: v["weight"] for k, v in self.buckets_config.items()}
         
-        # High Roller Check
+        # If PRD says LOSS, only allow Loss buckets
+        if not is_prd_win:
+            for k in list(weights.keys()):
+                if k.startswith("Win_Tier"):
+                    weights[k] = 0
+        else:
+            # If PRD says WIN, only allow Win buckets
+            for k in list(weights.keys()):
+                if k.startswith("Loss_"):
+                    weights[k] = 0
+        
+        # 3. Progress Tiers Check
+        progress_tiers = self.settings.get("progress_tiers", [])
+        if progress_tiers:
+            current_tier = None
+            # Find the highest tier that matches total_spins
+            for tier in sorted(progress_tiers, key=lambda x: x["min_spins"]):
+                if total_spins >= tier["min_spins"]:
+                    current_tier = tier
+                else:
+                    break
+            
+            if current_tier:
+                allowed = current_tier.get("allowed_buckets", ["ALL"])
+                if "ALL" not in allowed:
+                    for k in list(weights.keys()):
+                        if k not in allowed:
+                            weights[k] = 0
+
+        # 4. High Roller Check
         high_roller_threshold = self.settings.get("high_roller_threshold", 50.0)
         if bet < high_roller_threshold:
             # Remove high tiers
-            weights["Win_Tier_4"] = 0
-            weights["Win_Tier_5"] = 0
+            if "Win_Tier_4" in weights: weights["Win_Tier_4"] = 0
+            if "Win_Tier_5" in weights: weights["Win_Tier_5"] = 0
             
-        # RTP Safety Cap
-        # If (Balance + Potential Win) > Max * 1.2, forbid high wins
-        # Since we don't know the exact win yet, we conservatively block tiers that COULD exceed it.
-        # Or simpler: Pick a bucket, check max win of that bucket. If too high, reroll.
+        # 5. RTP Safety Cap (Ceiling)
+        # Logic: Strictly enforce the ceiling based on initial balance.
+        # Simulation and real spins now share the exact same logic.
         
-        # Let's do the "Pick then Validate" approach for Safety Cap
-        
-        max_allowed_balance = max_hist_bal * self.settings.get("max_historical_balance_buffer", 1.2)
+        max_win_ratio = self.settings.get("max_win_ratio", 1.2)
+        max_allowed_balance = initial_balance * max_win_ratio
         
         # Normalize weights
         total_weight = sum(weights.values())
-        if total_weight == 0: return "Loss_Random"
         
-        # Selection Loop (Try up to 3 times)
+        # Fallback: If PRD said WIN but all win buckets are filtered out, fallback to Loss
+        if total_weight == 0:
+            if is_prd_win:
+                weights = {k: v["weight"] for k, v in self.buckets_config.items() if k.startswith("Loss_")}
+                total_weight = sum(weights.values())
+                if total_weight == 0: return "Loss_Random"
+            else:
+                return "Loss_Random"
+        
+        # 6. Selection Loop (Try up to 3 times)
         for _ in range(3):
             r = random.uniform(0, total_weight)
             current = 0
@@ -265,17 +329,17 @@ class OutcomeEngine:
                     selected = k
                     break
             
-            # Validate Safety Cap
+            # Validate Safety Cap - ALWAYS enforced now, even in simulation
             max_potential_win = self.buckets_config[selected]["max_win"] * bet
             if balance + max_potential_win > max_allowed_balance:
                 # Too risky, try lower tier
-                # Temporarily remove this tier and retry
                 total_weight -= weights[selected]
                 weights[selected] = 0
-                if total_weight <= 0: return "Loss_Random"
+                if total_weight <= 0: 
+                    return "Loss_Random"
                 continue
-            else:
-                return selected
+            
+            return selected
                 
         return "Loss_Random"
 

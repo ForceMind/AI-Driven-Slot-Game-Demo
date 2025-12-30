@@ -1,5 +1,4 @@
 {
-  "reels_length": 16,
   "symbols": {
     "H2": {
       "id": "H2",
@@ -50,128 +49,48 @@
       "base_value": 50
     }
   },
-  "reel_sets": [
-    [
-      "H1",
-      "L1",
-      "L2",
-      "L3",
-      "H2",
-      "L1",
-      "L2",
-      "L3",
-      "H3",
-      "L1",
-      "L2",
-      "L3",
-      "WILD",
-      "L1",
-      "L2",
-      "SCATTER"
-    ],
-    [
-      "H1",
-      "L2",
-      "L3",
-      "L1",
-      "H2",
-      "L2",
-      "L3",
-      "L1",
-      "H3",
-      "L2",
-      "L3",
-      "L1",
-      "WILD",
-      "L2",
-      "L3",
-      "SCATTER"
-    ],
-    [
-      "H1",
-      "L3",
-      "L1",
-      "L2",
-      "H2",
-      "L3",
-      "L1",
-      "L2",
-      "H3",
-      "L3",
-      "L1",
-      "L2",
-      "WILD",
-      "L3",
-      "L1",
-      "SCATTER"
-    ],
-    [
-      "H1",
-      "L1",
-      "L2",
-      "L3",
-      "H2",
-      "L1",
-      "L2",
-      "L3",
-      "H3",
-      "L1",
-      "L2",
-      "L3",
-      "WILD",
-      "L1",
-      "L2",
-      "SCATTER"
-    ],
-    [
-      "H1",
-      "L2",
-      "L3",
-      "L1",
-      "H2",
-      "L2",
-      "L3",
-      "L1",
-      "H3",
-      "L2",
-      "L3",
-      "L1",
-      "WILD",
-      "L2",
-      "L3",
-      "SCATTER"
-    ]
+  "bet_levels": [
+    10,
+    50,
+    100,
+    200,
+    500
   ],
-  "pay_table": {
-    "H1": {
-      "3": 5,
-      "4": 20,
-      "5": 100
+  "buckets": {
+    "Loss_Random": {
+      "weight": 1800,
+      "min_win": 0,
+      "max_win": 0
     },
-    "H2": {
-      "3": 2,
-      "4": 10,
-      "5": 50
+    "Loss_NearMiss": {
+      "weight": 1200,
+      "min_win": 0,
+      "max_win": 0
     },
-    "H3": {
-      "3": 1,
-      "4": 5,
-      "5": 20
+    "Win_Tier_1": {
+      "weight": 200,
+      "min_win": 0.1,
+      "max_win": 5
     },
-    "L1": {
-      "3": 0.5,
-      "4": 2,
-      "5": 10
+    "Win_Tier_2": {
+      "weight": 100,
+      "min_win": 5,
+      "max_win": 10
     },
-    "L2": {
-      "3": 0.2,
-      "4": 1,
-      "5": 5
+    "Win_Tier_3": {
+      "weight": 50,
+      "min_win": 10,
+      "max_win": 20
     },
-    "L3": {
-      "3": 0.1,
-      "4": 0.5,
-      "5": 2
+    "Win_Tier_4": {
+      "weight": 20,
+      "min_win": 20,
+      "max_win": 30
+    },
+    "Win_Tier_5": {
+      "weight": 5,
+      "min_win": 50,
+      "max_win": 1000
     }
   },
   "lines": {
@@ -286,52 +205,172 @@
       ]
     ]
   },
-  "buckets": {
-    "Loss_Random": {
-      "weight": 1500,
-      "min_win": 0,
-      "max_win": 0
-    },
-    "Loss_NearMiss": {
-      "weight": 200,
-      "min_win": 0,
-      "max_win": 0
-    },
-    "Win_Tier_1": {
-      "weight": 500,
-      "min_win": 0.1,
-      "max_win": 5
-    },
-    "Win_Tier_2": {
-      "weight": 200,
-      "min_win": 5,
-      "max_win": 10
-    },
-    "Win_Tier_3": {
-      "weight": 100,
-      "min_win": 10,
-      "max_win": 20
-    },
-    "Win_Tier_4": {
-      "weight": 50,
-      "min_win": 20,
-      "max_win": 30
-    },
-    "Win_Tier_5": {
-      "weight": 10,
-      "min_win": 50,
-      "max_win": 1000
-    }
-  },
+  "reels_length": 16,
+  "reel_sets": [
+    [
+      "H1",
+      "L1",
+      "L2",
+      "L3",
+      "H2",
+      "L1",
+      "L2",
+      "L3",
+      "H3",
+      "L1",
+      "L2",
+      "L3",
+      "WILD",
+      "L1",
+      "L2",
+      "SCATTER"
+    ],
+    [
+      "H1",
+      "L2",
+      "L3",
+      "L1",
+      "H2",
+      "L2",
+      "L3",
+      "L1",
+      "H3",
+      "L2",
+      "L3",
+      "L1",
+      "WILD",
+      "L2",
+      "L3",
+      "SCATTER"
+    ],
+    [
+      "H1",
+      "L3",
+      "L1",
+      "L2",
+      "H2",
+      "L3",
+      "L1",
+      "L2",
+      "H3",
+      "L3",
+      "L1",
+      "L2",
+      "WILD",
+      "L3",
+      "L1",
+      "SCATTER"
+    ],
+    [
+      "H1",
+      "L1",
+      "L2",
+      "L3",
+      "H2",
+      "L1",
+      "L2",
+      "L3",
+      "H3",
+      "L1",
+      "L2",
+      "L3",
+      "WILD",
+      "L1",
+      "L2",
+      "SCATTER"
+    ],
+    [
+      "H1",
+      "L2",
+      "L3",
+      "L1",
+      "H2",
+      "L2",
+      "L3",
+      "L1",
+      "H3",
+      "L2",
+      "L3",
+      "L1",
+      "WILD",
+      "L2",
+      "L3",
+      "SCATTER"
+    ]
+  ],
   "settings": {
     "high_roller_threshold": 50,
-    "max_historical_balance_buffer": 1.2
+    "max_historical_balance_buffer": 1.2,
+    "max_win_ratio": 1.2,
+    "base_c_value": 0.15,
+    "target_rtp": 0.97,
+    "progress_tiers": [
+      {
+        "min_spins": 0,
+        "allowed_buckets": [
+          "Loss_Random",
+          "Loss_NearMiss",
+          "Win_Tier_1",
+          "Win_Tier_2",
+          "Win_Tier_3"
+        ]
+      },
+      {
+        "min_spins": 100,
+        "allowed_buckets": [
+          "Loss_Random",
+          "Loss_NearMiss",
+          "Win_Tier_1",
+          "Win_Tier_2",
+          "Win_Tier_3",
+          "Win_Tier_4"
+        ]
+      },
+      {
+        "min_spins": 500,
+        "allowed_buckets": [
+          "ALL"
+        ]
+      }
+    ]
   },
-  "bet_levels": [
-    10,
-    50,
-    100,
-    200,
-    500
-  ]
+  "pay_table": {
+    "H1": {
+      "3": 5,
+      "4": 20,
+      "5": 100
+    },
+    "H2": {
+      "3": 2,
+      "4": 10,
+      "5": 50
+    },
+    "H3": {
+      "3": 1,
+      "4": 5,
+      "5": 20
+    },
+    "L1": {
+      "3": 0.5,
+      "4": 2,
+      "5": 10
+    },
+    "L2": {
+      "3": 0.2,
+      "4": 1,
+      "5": 5
+    },
+    "L3": {
+      "3": 0.1,
+      "4": 0.5,
+      "5": 2
+    }
+  },
+  "llm_config": {
+    "provider": "openai",
+    "model": "gpt-3.5-turbo",
+    "api_key": "",
+    "target_rtp": 0.95,
+    "debug_mode": true
+  }
 }

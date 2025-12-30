@@ -13,9 +13,12 @@ class LLMConfig(BaseModel):
 class UserState(BaseModel):
     user_level: int = 1
     wallet_balance: float = 1000.0
+    initial_balance: float = 1000.0 # Added for max_win_ratio logic
     current_bet: float = 10.0
     historical_rtp: float = 0.0
     max_historical_balance: float = 1000.0
+    total_spins: int = 0 # Added for progress tiers
+    fail_streak: int = 0 # Added for PRD logic
 
 class SpinRequest(BaseModel):
     bet: float
@@ -39,5 +42,6 @@ class SpinResponse(BaseModel):
     balance_update: float
     history_rtp: float
     bucket_type: str = "Unknown"
+    fail_streak: int = 0 # Added for PRD logic
     raw_debug_info: Optional[Dict[str, Any]] = None
 

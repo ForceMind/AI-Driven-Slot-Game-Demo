@@ -5,13 +5,7 @@ export default {
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        'slot-gold': '#FFD700',
-        'slot-dark': '#1a1a1a',
-        'slot-panel': '#2d2d2d',
-      }
-    },
+    extend: {},
   },
   plugins: [],
 }

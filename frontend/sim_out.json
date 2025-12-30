@@ -1,0 +1,511 @@
+﻿{
+    "final_balance":  899.9,
+    "initial_balance":  1000.0,
+    "refills":  0,
+    "total_wagered":  1000.0,
+    "total_won":  899.9,
+    "rtp":  0.8999,
+    "spins_completed":  1000,
+    "history":  [
+                    {
+                        "spin":  10,
+                        "balance":  998.0,
+                        "rtp":  0.8
+                    },
+                    {
+                        "spin":  20,
+                        "balance":  991.7,
+                        "rtp":  0.585
+                    },
+                    {
+                        "spin":  30,
+                        "balance":  991.2,
+                        "rtp":  0.7067
+                    },
+                    {
+                        "spin":  40,
+                        "balance":  983.7,
+                        "rtp":  0.5925
+                    },
+                    {
+                        "spin":  50,
+                        "balance":  979.2,
+                        "rtp":  0.584
+                    },
+                    {
+                        "spin":  60,
+                        "balance":  976.2,
+                        "rtp":  0.6033
+                    },
+                    {
+                        "spin":  70,
+                        "balance":  970.2,
+                        "rtp":  0.5743
+                    },
+                    {
+                        "spin":  80,
+                        "balance":  965.7,
+                        "rtp":  0.5713
+                    },
+                    {
+                        "spin":  90,
+                        "balance":  964.4,
+                        "rtp":  0.6044
+                    },
+                    {
+                        "spin":  100,
+                        "balance":  961.6,
+                        "rtp":  0.616
+                    },
+                    {
+                        "spin":  110,
+                        "balance":  965.8,
+                        "rtp":  0.6891
+                    },
+                    {
+                        "spin":  120,
+                        "balance":  958.3,
+                        "rtp":  0.6525
+                    },
+                    {
+                        "spin":  130,
+                        "balance":  956.0,
+                        "rtp":  0.6615
+                    },
+                    {
+                        "spin":  140,
+                        "balance":  956.5,
+                        "rtp":  0.6893
+                    },
+                    {
+                        "spin":  150,
+                        "balance":  954.2,
+                        "rtp":  0.6947
+                    },
+                    {
+                        "spin":  160,
+                        "balance":  950.7,
+                        "rtp":  0.6919
+                    },
+                    {
+                        "spin":  170,
+                        "balance":  947.2,
+                        "rtp":  0.6894
+                    },
+                    {
+                        "spin":  180,
+                        "balance":  953.2,
+                        "rtp":  0.74
+                    },
+                    {
+                        "spin":  190,
+                        "balance":  945.9,
+                        "rtp":  0.7153
+                    },
+                    {
+                        "spin":  200,
+                        "balance":  954.4,
+                        "rtp":  0.772
+                    },
+                    {
+                        "spin":  210,
+                        "balance":  954.4,
+                        "rtp":  0.7829
+                    },
+                    {
+                        "spin":  220,
+                        "balance":  962.9,
+                        "rtp":  0.8314
+                    },
+                    {
+                        "spin":  230,
+                        "balance":  953.9,
+                        "rtp":  0.7996
+                    },
+                    {
+                        "spin":  240,
+                        "balance":  956.4,
+                        "rtp":  0.8183
+                    },
+                    {
+                        "spin":  250,
+                        "balance":  949.1,
+                        "rtp":  0.7964
+                    },
+                    {
+                        "spin":  260,
+                        "balance":  951.1,
+                        "rtp":  0.8119
+                    },
+                    {
+                        "spin":  270,
+                        "balance":  952.1,
+                        "rtp":  0.8226
+                    },
+                    {
+                        "spin":  280,
+                        "balance":  950.1,
+                        "rtp":  0.8218
+                    },
+                    {
+                        "spin":  290,
+                        "balance":  948.6,
+                        "rtp":  0.8228
+                    },
+                    {
+                        "spin":  300,
+                        "balance":  944.0,
+                        "rtp":  0.8133
+                    },
+                    {
+                        "spin":  310,
+                        "balance":  940.0,
+                        "rtp":  0.8065
+                    },
+                    {
+                        "spin":  320,
+                        "balance":  940.2,
+                        "rtp":  0.8131
+                    },
+                    {
+                        "spin":  330,
+                        "balance":  941.2,
+                        "rtp":  0.8218
+                    },
+                    {
+                        "spin":  340,
+                        "balance":  933.7,
+                        "rtp":  0.805
+                    },
+                    {
+                        "spin":  350,
+                        "balance":  929.2,
+                        "rtp":  0.7977
+                    },
+                    {
+                        "spin":  360,
+                        "balance":  928.2,
+                        "rtp":  0.8006
+                    },
+                    {
+                        "spin":  370,
+                        "balance":  924.7,
+                        "rtp":  0.7965
+                    },
+                    {
+                        "spin":  380,
+                        "balance":  919.9,
+                        "rtp":  0.7892
+                    },
+                    {
+                        "spin":  390,
+                        "balance":  914.4,
+                        "rtp":  0.7805
+                    },
+                    {
+                        "spin":  400,
+                        "balance":  910.4,
+                        "rtp":  0.776
+                    },
+                    {
+                        "spin":  410,
+                        "balance":  912.4,
+                        "rtp":  0.7863
+                    },
+                    {
+                        "spin":  420,
+                        "balance":  907.1,
+                        "rtp":  0.7788
+                    },
+                    {
+                        "spin":  430,
+                        "balance":  910.1,
+                        "rtp":  0.7909
+                    },
+                    {
+                        "spin":  440,
+                        "balance":  905.1,
+                        "rtp":  0.7843
+                    },
+                    {
+                        "spin":  450,
+                        "balance":  905.1,
+                        "rtp":  0.7891
+                    },
+                    {
+                        "spin":  460,
+                        "balance":  900.1,
+                        "rtp":  0.7828
+                    },
+                    {
+                        "spin":  470,
+                        "balance":  893.8,
+                        "rtp":  0.774
+                    },
+                    {
+                        "spin":  480,
+                        "balance":  891.8,
+                        "rtp":  0.7746
+                    },
+                    {
+                        "spin":  490,
+                        "balance":  885.3,
+                        "rtp":  0.7659
+                    },
+                    {
+                        "spin":  500,
+                        "balance":  882.8,
+                        "rtp":  0.7656
+                    },
+                    {
+                        "spin":  510,
+                        "balance":  891.8,
+                        "rtp":  0.7878
+                    },
+                    {
+                        "spin":  520,
+                        "balance":  883.8,
+                        "rtp":  0.7765
+                    },
+                    {
+                        "spin":  530,
+                        "balance":  882.0,
+                        "rtp":  0.7774
+                    },
+                    {
+                        "spin":  540,
+                        "balance":  878.1,
+                        "rtp":  0.7743
+                    },
+                    {
+                        "spin":  550,
+                        "balance":  875.6,
+                        "rtp":  0.7738
+                    },
+                    {
+                        "spin":  560,
+                        "balance":  875.6,
+                        "rtp":  0.7779
+                    },
+                    {
+                        "spin":  570,
+                        "balance":  884.3,
+                        "rtp":  0.797
+                    },
+                    {
+                        "spin":  580,
+                        "balance":  881.5,
+                        "rtp":  0.7957
+                    },
+                    {
+                        "spin":  590,
+                        "balance":  874.5,
+                        "rtp":  0.7873
+                    },
+                    {
+                        "spin":  600,
+                        "balance":  877.2,
+                        "rtp":  0.7953
+                    },
+                    {
+                        "spin":  610,
+                        "balance":  871.2,
+                        "rtp":  0.7889
+                    },
+                    {
+                        "spin":  620,
+                        "balance":  865.7,
+                        "rtp":  0.7834
+                    },
+                    {
+                        "spin":  630,
+                        "balance":  863.7,
+                        "rtp":  0.7837
+                    },
+                    {
+                        "spin":  640,
+                        "balance":  878.7,
+                        "rtp":  0.8105
+                    },
+                    {
+                        "spin":  650,
+                        "balance":  879.7,
+                        "rtp":  0.8149
+                    },
+                    {
+                        "spin":  660,
+                        "balance":  876.9,
+                        "rtp":  0.8135
+                    },
+                    {
+                        "spin":  670,
+                        "balance":  887.4,
+                        "rtp":  0.8319
+                    },
+                    {
+                        "spin":  680,
+                        "balance":  878.1,
+                        "rtp":  0.8207
+                    },
+                    {
+                        "spin":  690,
+                        "balance":  877.1,
+                        "rtp":  0.8219
+                    },
+                    {
+                        "spin":  700,
+                        "balance":  873.1,
+                        "rtp":  0.8187
+                    },
+                    {
+                        "spin":  710,
+                        "balance":  877.1,
+                        "rtp":  0.8269
+                    },
+                    {
+                        "spin":  720,
+                        "balance":  883.1,
+                        "rtp":  0.8376
+                    },
+                    {
+                        "spin":  730,
+                        "balance":  886.3,
+                        "rtp":  0.8442
+                    },
+                    {
+                        "spin":  740,
+                        "balance":  878.8,
+                        "rtp":  0.8362
+                    },
+                    {
+                        "spin":  750,
+                        "balance":  873.7,
+                        "rtp":  0.8316
+                    },
+                    {
+                        "spin":  760,
+                        "balance":  866.7,
+                        "rtp":  0.8246
+                    },
+                    {
+                        "spin":  770,
+                        "balance":  875.2,
+                        "rtp":  0.8379
+                    },
+                    {
+                        "spin":  780,
+                        "balance":  880.2,
+                        "rtp":  0.8464
+                    },
+                    {
+                        "spin":  790,
+                        "balance":  874.7,
+                        "rtp":  0.8414
+                    },
+                    {
+                        "spin":  800,
+                        "balance":  871.2,
+                        "rtp":  0.839
+                    },
+                    {
+                        "spin":  810,
+                        "balance":  873.2,
+                        "rtp":  0.8435
+                    },
+                    {
+                        "spin":  820,
+                        "balance":  883.9,
+                        "rtp":  0.8584
+                    },
+                    {
+                        "spin":  830,
+                        "balance":  898.9,
+                        "rtp":  0.8782
+                    },
+                    {
+                        "spin":  840,
+                        "balance":  905.1,
+                        "rtp":  0.887
+                    },
+                    {
+                        "spin":  850,
+                        "balance":  903.1,
+                        "rtp":  0.886
+                    },
+                    {
+                        "spin":  860,
+                        "balance":  897.1,
+                        "rtp":  0.8803
+                    },
+                    {
+                        "spin":  870,
+                        "balance":  892.6,
+                        "rtp":  0.8766
+                    },
+                    {
+                        "spin":  880,
+                        "balance":  885.8,
+                        "rtp":  0.8702
+                    },
+                    {
+                        "spin":  890,
+                        "balance":  885.8,
+                        "rtp":  0.8717
+                    },
+                    {
+                        "spin":  900,
+                        "balance":  885.8,
+                        "rtp":  0.8731
+                    },
+                    {
+                        "spin":  910,
+                        "balance":  890.8,
+                        "rtp":  0.88
+                    },
+                    {
+                        "spin":  920,
+                        "balance":  891.3,
+                        "rtp":  0.8818
+                    },
+                    {
+                        "spin":  930,
+                        "balance":  889.3,
+                        "rtp":  0.881
+                    },
+                    {
+                        "spin":  940,
+                        "balance":  896.0,
+                        "rtp":  0.8894
+                    },
+                    {
+                        "spin":  950,
+                        "balance":  901.0,
+                        "rtp":  0.8958
+                    },
+                    {
+                        "spin":  960,
+                        "balance":  913.5,
+                        "rtp":  0.9099
+                    },
+                    {
+                        "spin":  970,
+                        "balance":  913.7,
+                        "rtp":  0.911
+                    },
+                    {
+                        "spin":  980,
+                        "balance":  907.2,
+                        "rtp":  0.9053
+                    },
+                    {
+                        "spin":  990,
+                        "balance":  901.9,
+                        "rtp":  0.9009
+                    },
+                    {
+                        "spin":  1000,
+                        "balance":  899.9,
+                        "rtp":  0.8999
+                    }
+                ]
+}

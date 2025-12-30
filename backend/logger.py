@@ -5,12 +5,14 @@ from datetime import datetime
 
 class GameLogger:
     def __init__(self, filename="game_data.csv"):
-        self.filename = filename
+        # Use an absolute path anchored to the backend directory to avoid CWD issues
+        base_dir = os.path.dirname(__file__)
+        self.filepath = os.path.join(base_dir, filename)
         self._ensure_file_exists()
 
     def _ensure_file_exists(self):
-        if not os.path.exists(self.filename):
-            with open(self.filename, mode='w', newline='', encoding='utf-8') as f:
+        if not os.path.exists(self.filepath):
+            with open(self.filepath, mode='w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow([
                     "Timestamp", "Spin_ID", "Bet", "Payout", "Is_Win", 
@@ -20,7 +22,7 @@ class GameLogger:
     def log_spin(self, spin_id: str, bet: float, payout: float, 
                  current_rtp: float, provider: str, latency_ms: float):
         is_win = payout > 0
-        with open(self.filename, mode='a', newline='', encoding='utf-8') as f:
+        with open(self.filepath, mode='a', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow([
                 datetime.now().isoformat(),
@@ -38,10 +40,10 @@ class GameLogger:
         total_bet = 100.0 
         total_payout = 95.0
         try:
-            if not os.path.exists(self.filename):
+            if not os.path.exists(self.filepath):
                 return total_bet, total_payout, 0.95
             
-            with open(self.filename, mode='r', encoding='utf-8') as f:
+            with open(self.filepath, mode='r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     try:
