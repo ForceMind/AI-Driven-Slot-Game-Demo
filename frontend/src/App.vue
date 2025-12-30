@@ -292,23 +292,23 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col items-center p-8 gap-8 font-sans">
-        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+    <div class="min-h-screen flex flex-col items-center p-4 md:p-8 gap-4 md:gap-8 font-sans overflow-x-hidden">
+        <h1 class="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent text-center">
             Slot Master Pro
         </h1>
         
         <!-- Stats -->
-        <div class="flex gap-8 text-xl font-mono">
-            <div class="flex flex-col items-center">
-                <span class="text-xs text-slate-500">余额 (BALANCE)</span>
+        <div class="flex flex-wrap justify-center gap-4 md:gap-8 text-sm md:text-xl font-mono w-full">
+            <div class="flex flex-col items-center min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">余额 (BALANCE)</span>
                 <span class="text-yellow-400">🪙 {{ gameState.balance.toFixed(2) }}</span>
             </div>
-            <div class="flex flex-col items-center">
-                <span class="text-xs text-slate-500">赢取 (WIN)</span>
+            <div class="flex flex-col items-center min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">赢取 (WIN)</span>
                 <span class="text-green-400">🪙 {{ gameState.lastWin.toFixed(2) }}</span>
             </div>
-            <div class="flex flex-col items-center group relative cursor-help">
-                <span class="text-xs text-slate-500">用户 RTP</span>
+            <div class="flex flex-col items-center group relative cursor-help min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">用户 RTP</span>
                 <span class="text-blue-400 border-b border-dotted border-blue-400/30">{{ gameState.totalWagered > 0 ? ((gameState.totalWon / gameState.totalWagered) * 100).toFixed(1) : '0.0' }}%</span>
                 <div class="absolute top-full mt-2 hidden group-hover:block bg-slate-900 text-xs p-3 rounded border border-slate-700 whitespace-nowrap z-50 shadow-xl text-left">
                     <div class="text-slate-400 mb-1">统计数据 (Stats)</div>
@@ -316,21 +316,21 @@ onMounted(() => {
                     <div class="flex justify-between gap-4"><span>总赢取:</span> <span class="text-green-400">🪙 {{ gameState.totalWon.toFixed(2) }}</span></div>
                 </div>
             </div>
-            <div class="flex flex-col items-center">
-                <span class="text-xs text-slate-500">连败 (FAIL STREAK)</span>
+            <div class="flex flex-col items-center min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">连败 (FAIL STREAK)</span>
                 <span class="text-red-400">{{ gameState.failStreak }}</span>
             </div>
-            <div class="flex flex-col items-center">
-                <span class="text-xs text-slate-500">旋转数 (SPINS)</span>
+            <div class="flex flex-col items-center min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">旋转数 (SPINS)</span>
                 <span class="text-purple-400">{{ gameState.totalSpins }}</span>
             </div>
         </div>
 
         <!-- Grid Area -->
-        <div class="flex flex-col lg:flex-row gap-8 items-start justify-center w-full max-w-6xl relative">
+        <div class="flex flex-col lg:flex-row gap-8 items-start justify-center w-full max-w-5xl relative">
             
             <!-- Slot Grid (Centered on Desktop) -->
-            <div class="flex-1 flex justify-center w-full">
+            <div class="flex-1 flex justify-center w-full max-w-3xl mx-auto">
                 <SlotGrid 
                     :matrix="gameState.matrix" 
                     :winning-lines="gameState.winningLines"
@@ -339,7 +339,7 @@ onMounted(() => {
             </div>
             
             <!-- Winning Lines List (Right Side on Large Screens, Bottom on Mobile/Tablet) -->
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-48 lg:h-[340px] overflow-y-auto lg:absolute lg:right-0 lg:top-0 shadow-xl order-last lg:order-none">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-48 lg:h-[340px] overflow-y-auto lg:absolute lg:right-[-280px] lg:top-0 shadow-xl order-last lg:order-none">
                 <h3 class="text-sm font-bold text-slate-400 mb-2 flex justify-between items-center">
                     <span>中奖线 (Lines)</span>
                     <span v-if="gameState.lastWin > 0" class="text-green-400 text-xs">+ 🪙 {{ gameState.lastWin.toFixed(2) }}</span>
