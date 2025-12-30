@@ -125,10 +125,13 @@ sudo systemctl restart $SERVICE_NAME
 echo ">>> 配置 Nginx 以提供前端并代理后端 API..."
 NGINX_CONFIG="/etc/nginx/sites-available/slot-game"
 
+# 使用 cat 写入配置
+# 注意：为了防止 Windows 换行符 (\r) 导致 Nginx 配置错误 (如 location /api/^M)，
+# 我们会在写入后使用 sed 清理文件。
 sudo bash -c "cat > $NGINX_CONFIG" <<EOL
 server {
-    listen 80;
-    server_name $DOMAIN_NAME;
+    listen 80 default_server;
+    server_name _;
 
     # 前端静态文件
     location / {
@@ -137,17 +140,24 @@ server {
         try_files \$uri \$uri/ /index.html;
     }
 
-    # 后端 API 代理（将 /api/ 前缀转发到后端）
-    location /api/ {
-        # 将 /api/xxx -> http://127.0.0.1:8000/xxx
-        # 注意：uvicorn 默认不带 /api 前缀，所以这里需要 rewrite 或者让 uvicorn 挂载在 /api 下
-        # 当前 app.py 没有定义 /api 前缀，所以需要去掉 /api
+    # 后端 API 代理
+    # 使用 ^~ 提高优先级，确保 /api/ 开头的请求一定被此块处理
+    location ^~ /api/ {
         proxy_pass http://127.0.0.1:8000/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        
+        # 增加超时设置，防止长轮询或慢请求断开
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 60s;
     }
 }
 EOL
+
+# 清理可能存在的 Windows 换行符 (\r)
+echo ">>> 清理 Nginx 配置文件中的 Windows 换行符..."
+sudo sed -i 's/\r$//' $NGINX_CONFIG
 
 # 启用站点配置
 if [ ! -f "/etc/nginx/sites-enabled/slot-game" ]; then
