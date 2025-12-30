@@ -330,7 +330,7 @@ onMounted(() => {
         <div class="flex flex-col lg:flex-row gap-8 items-start justify-center w-full max-w-6xl relative">
             
             <!-- Slot Grid (Centered on Desktop) -->
-            <div class="flex-1 flex justify-center">
+            <div class="flex-1 flex justify-center w-full">
                 <SlotGrid 
                     :matrix="gameState.matrix" 
                     :winning-lines="gameState.winningLines"
@@ -339,7 +339,7 @@ onMounted(() => {
             </div>
             
             <!-- Winning Lines List (Right Side on Large Screens, Bottom on Mobile/Tablet) -->
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-48 lg:h-[340px] overflow-y-auto lg:absolute lg:right-0 lg:top-0 shadow-xl">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-48 lg:h-[340px] overflow-y-auto lg:absolute lg:right-0 lg:top-0 shadow-xl order-last lg:order-none">
                 <h3 class="text-sm font-bold text-slate-400 mb-2 flex justify-between items-center">
                     <span>中奖线 (Lines)</span>
                     <span v-if="gameState.lastWin > 0" class="text-green-400 text-xs">+ 🪙 {{ gameState.lastWin.toFixed(2) }}</span>

@@ -108,6 +108,8 @@ server {
     # 后端 API 代理（将 /api/ 前缀转发到后端）
     location /api/ {
         # 将 /api/xxx -> http://127.0.0.1:8000/xxx
+        # 注意：uvicorn 默认不带 /api 前缀，所以这里需要 rewrite 或者让 uvicorn 挂载在 /api 下
+        # 当前 app.py 没有定义 /api 前缀，所以需要去掉 /api
         proxy_pass http://127.0.0.1:8000/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
