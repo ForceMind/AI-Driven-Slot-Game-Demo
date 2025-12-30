@@ -196,8 +196,29 @@ const resetUser = async () => {
     window.location.reload()
 }
 
+const changeBet = (delta) => {
+    if (!config.value || !config.value.bet_levels) {
+        // Fallback if config not loaded
+        gameState.value.bet = Math.max(10, gameState.value.bet + (delta * 10))
+        return
+    }
+    const levels = config.value.bet_levels
+    let currentIndex = levels.indexOf(gameState.value.bet)
+    
+    // If current bet is not in levels, find the closest one
+    if (currentIndex === -1) {
+        currentIndex = levels.findIndex(l => l >= gameState.value.bet)
+        if (currentIndex === -1) currentIndex = levels.length - 1
+    }
+
+    let nextIndex = currentIndex + delta
+    if (nextIndex < 0) nextIndex = 0
+    if (nextIndex >= levels.length) nextIndex = levels.length - 1
+    gameState.value.bet = levels[nextIndex]
+}
+
 const topUpBalance = async () => {
-    if(!confirm("是否充值 $100?")) return
+    if(!confirm("是否充值 100 🪙?")) return
     try {
         await fetch('/api/topup', { 
             method: 'POST',
@@ -273,19 +294,19 @@ onMounted(() => {
         <div class="flex gap-8 text-xl font-mono">
             <div class="flex flex-col items-center">
                 <span class="text-xs text-slate-500">余额 (BALANCE)</span>
-                <span class="text-yellow-400">${{ gameState.balance.toFixed(2) }}</span>
+                <span class="text-yellow-400">🪙 {{ gameState.balance.toFixed(2) }}</span>
             </div>
             <div class="flex flex-col items-center">
                 <span class="text-xs text-slate-500">赢取 (WIN)</span>
-                <span class="text-green-400">${{ gameState.lastWin.toFixed(2) }}</span>
+                <span class="text-green-400">🪙 {{ gameState.lastWin.toFixed(2) }}</span>
             </div>
             <div class="flex flex-col items-center group relative cursor-help">
                 <span class="text-xs text-slate-500">用户 RTP</span>
                 <span class="text-blue-400 border-b border-dotted border-blue-400/30">{{ gameState.totalWagered > 0 ? ((gameState.totalWon / gameState.totalWagered) * 100).toFixed(1) : '0.0' }}%</span>
                 <div class="absolute top-full mt-2 hidden group-hover:block bg-slate-900 text-xs p-3 rounded border border-slate-700 whitespace-nowrap z-50 shadow-xl text-left">
                     <div class="text-slate-400 mb-1">统计数据 (Stats)</div>
-                    <div class="flex justify-between gap-4"><span>总下注:</span> <span class="text-white">${{ gameState.totalWagered.toFixed(2) }}</span></div>
-                    <div class="flex justify-between gap-4"><span>总赢取:</span> <span class="text-green-400">${{ gameState.totalWon.toFixed(2) }}</span></div>
+                    <div class="flex justify-between gap-4"><span>总下注:</span> <span class="text-white">🪙 {{ gameState.totalWagered.toFixed(2) }}</span></div>
+                    <div class="flex justify-between gap-4"><span>总赢取:</span> <span class="text-green-400">🪙 {{ gameState.totalWon.toFixed(2) }}</span></div>
                 </div>
             </div>
             <div class="flex flex-col items-center">
@@ -311,17 +332,17 @@ onMounted(() => {
             </div>
             
             <!-- Winning Lines List (Right Side on Large Screens, Bottom on Mobile/Tablet) -->
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-[340px] overflow-y-auto lg:absolute lg:right-0 lg:top-0 shadow-xl">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-48 lg:h-[340px] overflow-y-auto lg:absolute lg:right-0 lg:top-0 shadow-xl">
                 <h3 class="text-sm font-bold text-slate-400 mb-2 flex justify-between items-center">
                     <span>中奖线 (Lines)</span>
-                    <span v-if="gameState.lastWin > 0" class="text-green-400 text-xs">+${{ gameState.lastWin.toFixed(2) }}</span>
+                    <span v-if="gameState.lastWin > 0" class="text-green-400 text-xs">+ 🪙 {{ gameState.lastWin.toFixed(2) }}</span>
                 </h3>
                 <div v-if="gameState.winningLines.length > 0" class="space-y-2">
                     <div v-for="(line, i) in gameState.winningLines" :key="i" class="text-xs bg-slate-800 p-2 rounded border border-yellow-900/50 hover:bg-slate-700 transition-colors">
                         <div class="flex justify-between text-yellow-400 font-bold items-center">
                             <span>Line {{ line.line_id + 1 }}</span>
                             <div class="text-right">
-                                <div>${{ line.amount.toFixed(2) }}</div>
+                                <div>🪙 {{ line.amount.toFixed(2) }}</div>
                                 <div class="text-[10px] text-slate-500 font-normal">
                                     {{ (line.amount / gameState.bet).toFixed(1) }}x
                                 </div>
@@ -344,12 +365,12 @@ onMounted(() => {
         <!-- Controls -->
         <div class="flex gap-4 items-center">
             <div class="flex items-center bg-slate-900 rounded-lg p-2 gap-4">
-                <button @click="gameState.bet = Math.max(1, gameState.bet - 10)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700">-</button>
+                <button @click="changeBet(-1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700">-</button>
                 <div class="text-center w-20">
                     <div class="text-xs text-slate-500">下注 (BET)</div>
-                    <div class="font-bold">${{ gameState.bet }}</div>
+                    <div class="font-bold">🪙 {{ gameState.bet }}</div>
                 </div>
-                <button @click="gameState.bet += 10" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700">+</button>
+                <button @click="changeBet(1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700">+</button>
             </div>
             
             <!-- Fixed width to prevent jumping -->
@@ -412,13 +433,13 @@ onMounted(() => {
                         <div>
                             <div class="text-xs text-slate-400">净利润 (Net Profit)</div>
                             <div class="text-xl font-bold" :class="(simResult.net_profit ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'">
-                                ${{ (simResult.net_profit ?? 0).toFixed(2) }}
+                                🪙 {{ (simResult.net_profit ?? 0).toFixed(2) }}
                             </div>
                         </div>
                         <!-- Removed Final Balance as it is redundant with Net Profit in pure sim mode -->
                         <div>
                             <div class="text-xs text-slate-400">总下注 (Total Bet)</div>
-                            <div class="text-xl font-bold text-white">${{ (simConfig.n_spins * simConfig.bet).toFixed(0) }}</div>
+                            <div class="text-xl font-bold text-white">🪙 {{ (simConfig.n_spins * simConfig.bet).toFixed(0) }}</div>
                         </div>
                         <div>
                             <div class="text-xs text-slate-400">实际 RTP</div>
@@ -470,7 +491,7 @@ onMounted(() => {
                                  class="absolute z-10 bg-slate-800 border border-slate-600 p-2 rounded shadow-xl text-[10px] pointer-events-none"
                                  :style="{ left: hoverPoint.x > 50 ? 'auto' : (hoverPoint.x + 2) + '%', right: hoverPoint.x > 50 ? (100 - hoverPoint.x + 2) + '%' : 'auto', top: '10%' }">
                                 <div class="text-slate-400">Point: {{ hoverPoint.spin }}</div>
-                                <div class="text-green-400 font-bold">Profit: ${{ Number(hoverPoint.balance).toFixed(2) }}</div>
+                                <div class="text-green-400 font-bold">Profit: 🪙 {{ Number(hoverPoint.balance).toFixed(2) }}</div>
                                 <div class="text-blue-400">RTP: {{ (Number(hoverPoint.rtp) * 100).toFixed(1) }}%</div>
                             </div>
 

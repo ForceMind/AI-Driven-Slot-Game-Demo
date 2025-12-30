@@ -198,11 +198,12 @@ async def simulate(params: dict = Body(...)):
     # Simulation starts with a virtual balance of 1000 to test the ceiling logic
     initial_balance = 1000
     current_balance = initial_balance
-    max_balance = balance
+    max_balance = current_balance
     
     total_wagered = 0
     total_won = 0
     fail_streak = 0
+    history = []
     
     for i in range(count):
         # Calculate current RTP for the engine to use in its logic

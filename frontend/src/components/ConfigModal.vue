@@ -527,8 +527,8 @@ onMounted(() => {
                     <tbody class="divide-y divide-slate-800">
                         <tr v-for="(row, i) in historyData" :key="i" class="hover:bg-slate-800/50">
                             <td class="px-4 py-2 text-slate-500">{{ row.Timestamp?.split('T')[1]?.split('.')[0] }}</td>
-                            <td class="px-4 py-2">${{ row.Bet }}</td>
-                            <td class="px-4 py-2" :class="row.Payout > 0 ? 'text-green-400 font-bold' : 'text-slate-400'">${{ row.Payout }}</td>
+                            <td class="px-4 py-2">🪙 {{ row.Bet }}</td>
+                            <td class="px-4 py-2" :class="row.Payout > 0 ? 'text-green-400 font-bold' : 'text-slate-400'">🪙 {{ row.Payout }}</td>
                             <td class="px-4 py-2 text-slate-400">{{ (row.Current_RTP * 100).toFixed(1) }}%</td>
                             <td class="px-4 py-2 text-slate-500">{{ row.AI_Provider }}</td>
                         </tr>
