@@ -62,8 +62,8 @@ class OutcomeEngine:
         print("Config loaded/parsed. Initializing buckets...")
         self.initialize_buckets()
         
-        # 自动校准 RTP
-        self._auto_calibrate_rtp()
+        # 自动校准 RTP (已禁用：由前端手动计算)
+        # self._auto_calibrate_rtp()
 
     def _auto_calibrate_rtp(self):
         """
@@ -153,6 +153,28 @@ class OutcomeEngine:
         for k, v in self.buckets.items():
             print(f"Bucket {k}: {len(v)} outcomes")
             
+        # 计算并存储每个 Bucket 的真实平均倍数
+        self.bucket_stats = {}
+        for k, stops_list in self.buckets.items():
+            if not stops_list:
+                self.bucket_stats[k] = 0.0
+                continue
+                
+            # 为了性能，如果数据量太大，只采样前 1000 个计算平均值
+            sample_size = min(len(stops_list), 1000)
+            total_mult = 0.0
+            
+            # 随机采样以获得更准确的估算
+            samples = random.sample(stops_list, sample_size)
+            
+            for stops in samples:
+                matrix = self._get_matrix_from_stops(stops)
+                mult, _, _ = self._calculate_win(matrix)
+                total_mult += mult
+                
+            self.bucket_stats[k] = total_mult / sample_size
+            # print(f"Bucket {k} Real Avg Multiplier: {self.bucket_stats[k]:.2f}x")
+
         self.is_ready = True
 
     def _process_stop(self, stops: List[int]):
@@ -332,14 +354,22 @@ class OutcomeEngine:
         # 动态 RTP 调控 (RTP Control)
         target_rtp = self.settings.get("target_rtp", 0.97)
         
-        # 如果用户玩了足够多把 (比如 > 50)，且 RTP 严重偏离，进行修正
+        # 如果用户玩了足够多把 (比如 > 50)，且 RTP 严重偏离，进行分级修正
         if total_spins > 50:
-            if historical_rtp < target_rtp * 0.8: # 亏太多了 (RTP < 77%)
-                base_c *= 1.5 # 提高 50% 中奖率
-                # print(f"RTP too low ({historical_rtp:.2f}), boosting C to {base_c:.3f}")
-            elif historical_rtp > target_rtp * 1.5: # 赢太多了 (RTP > 145%)
-                base_c *= 0.7 # 降低 30% 中奖率
-                # print(f"RTP too high ({historical_rtp:.2f}), lowering C to {base_c:.3f}")
+            rtp_ratio = historical_rtp / target_rtp if target_rtp > 0 else 1.0
+            
+            if rtp_ratio < 0.5:   # 极度亏损 (RTP < 50% Target)
+                base_c *= 2.0     # 强力提升中奖率
+            elif rtp_ratio < 0.8: # 明显亏损 (RTP < 80% Target)
+                base_c *= 1.5     # 提升中奖率
+            elif rtp_ratio < 0.95: # 轻微亏损
+                base_c *= 1.1     # 微调
+            elif rtp_ratio > 2.0: # 极度盈利 (RTP > 200% Target)
+                base_c *= 0.5     # 强力降低中奖率
+            elif rtp_ratio > 1.5: # 明显盈利 (RTP > 150% Target)
+                base_c *= 0.7     # 降低中奖率
+            elif rtp_ratio > 1.05: # 轻微盈利
+                base_c *= 0.9     # 微调
 
         win_prob = base_c * (fail_streak + 1)
         

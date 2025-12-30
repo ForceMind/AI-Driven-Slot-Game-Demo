@@ -68,12 +68,12 @@
       "max_win": 0
     },
     "Win_Tier_1": {
-      "weight": 200,
+      "weight": 1000,
       "min_win": 0.1,
       "max_win": 5
     },
     "Win_Tier_2": {
-      "weight": 100,
+      "weight": 2000,
       "min_win": 5,
       "max_win": 10
     },
@@ -88,7 +88,7 @@
       "max_win": 30
     },
     "Win_Tier_5": {
-      "weight": 5,
+      "weight": 1,
       "min_win": 50,
       "max_win": 1000
     }
@@ -391,7 +391,7 @@
     "max_historical_balance_buffer": 1.2,
     "max_win_ratio": 1.1,
     "base_c_value": 0.15,
-    "target_rtp": 0.97,
+    "target_rtp": 0.9742,
     "progress_tiers": [
       {
         "min_spins": 0,

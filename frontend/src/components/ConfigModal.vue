@@ -20,6 +20,7 @@ const visualConfig = ref({
     reel_sets: [],
     settings: {}
 })
+const initialConfig = ref(null) // Store initial state for dirty checking
 const historyData = ref([])
 const isLoading = ref(false)
 
@@ -46,16 +47,16 @@ const loadGameConfig = async () => {
         pay_table: {}
     }
     
-    visualConfig.value = { ...defaults, ...JSON.parse(JSON.stringify(data)) }
+    const merged = { ...defaults, ...JSON.parse(JSON.stringify(data)) }
     
     // Deep merge for nested objects if necessary (simplified here)
-    if (!visualConfig.value.bet_levels) visualConfig.value.bet_levels = defaults.bet_levels
-    if (!visualConfig.value.settings) visualConfig.value.settings = defaults.settings
+    if (!merged.bet_levels) merged.bet_levels = defaults.bet_levels
+    if (!merged.settings) merged.settings = defaults.settings
     
     // Ensure buckets have min_win/max_win initialized and normalize keys
-    if (visualConfig.value.buckets) {
-        for (const key in visualConfig.value.buckets) {
-            const b = visualConfig.value.buckets[key]
+    if (merged.buckets) {
+        for (const key in merged.buckets) {
+            const b = merged.buckets[key]
             // Handle legacy keys (min/max) -> new keys (min_win/max_win)
             if (b.min !== undefined && b.min_win === undefined) b.min_win = b.min
             if (b.max !== undefined && b.max_win === undefined) b.max_win = b.max
@@ -65,6 +66,9 @@ const loadGameConfig = async () => {
             if (b.max_win === undefined) b.max_win = 0
         }
     }
+    
+    visualConfig.value = merged
+    initialConfig.value = JSON.parse(JSON.stringify(merged)) // Deep copy for comparison
 
   } catch (e) {
     console.error("Failed to load config", e)
@@ -73,6 +77,18 @@ const loadGameConfig = async () => {
     isLoading.value = false
   }
 }
+
+// --- Dirty Checking Logic ---
+const isReelSectionDirty = computed(() => {
+    if (!initialConfig.value || !visualConfig.value) return false
+    const keys = ['symbols', 'reel_sets', 'lines', 'pay_table']
+    return keys.some(k => JSON.stringify(visualConfig.value[k]) !== JSON.stringify(initialConfig.value[k]))
+})
+
+const isBucketSectionDirty = computed(() => {
+    if (!initialConfig.value || !visualConfig.value) return false
+    return JSON.stringify(visualConfig.value.buckets) !== JSON.stringify(initialConfig.value.buckets)
+})
 
 const loadHistory = async () => {
     try {
@@ -184,6 +200,79 @@ const toggleLineCell = (lineId, row, col) => {
         // Sort by column then row for consistency
         line.sort((a, b) => a[1] - b[1] || a[0] - b[0])
     }
+}
+
+// --- RTP Calculation Logic ---
+const calculatedRTP = ref(null)
+const calculatedHitFreq = ref(null)
+
+const calculateTheoreticalRTP = () => {
+    if (!visualConfig.value || !visualConfig.value.buckets) return
+
+    const buckets = visualConfig.value.buckets
+    const baseC = visualConfig.value.settings.base_c_value || 0.05
+    
+    // 1. Calculate Hit Frequency (P) from Base C
+    // PRD Formula Approximation:
+    // P ≈ C * (Average Fail Streak + 1)
+    // Average Fail Streak N ≈ (1/P) - 1
+    // So P ≈ C * (1/P) => P^2 ≈ C => P ≈ sqrt(C)? No, that's for C=P^2
+    // Let's use the empirical linear approximation for small C:
+    // Hit Freq ≈ C * 4.5 (for C around 0.05-0.15)
+    // Or more accurately, simulate it:
+    let totalSpins = 100000
+    let wins = 0
+    let failStreak = 0
+    for(let i=0; i<totalSpins; i++) {
+        let prob = baseC * (failStreak + 1)
+        if (Math.random() < prob) {
+            wins++
+            failStreak = 0
+        } else {
+            failStreak++
+        }
+    }
+    const hitFreq = wins / totalSpins
+    calculatedHitFreq.value = hitFreq
+
+    // 2. Calculate Average Win Multiplier (M)
+    let totalWeight = 0
+    let weightedSum = 0
+    
+    for (const key in buckets) {
+        if (key.startsWith("Win_Tier")) {
+            const b = buckets[key]
+            const w = b.weight || 0
+            
+            // Use real average multiplier if available from backend, otherwise fallback to (min+max)/2
+            let avgMult = 0
+            if (b.real_avg_mult !== undefined) {
+                avgMult = b.real_avg_mult
+            } else {
+                avgMult = (b.min_win + b.max_win) / 2
+            }
+            
+            weightedSum += w * avgMult
+            totalWeight += w
+        }
+    }
+    
+    const avgWinMult = totalWeight > 0 ? (weightedSum / totalWeight) : 0
+    
+    // 3. Calculate RTP
+    const rtp = hitFreq * avgWinMult
+    
+    calculatedRTP.value = {
+        rtp: rtp,
+        hitFreq: hitFreq,
+        avgMult: avgWinMult
+    }
+
+    // Update the Target RTP setting to match the calculation
+    // User Request: "设置里的目标RTP还是需要手动设置，不能根据下方自动计算填入" -> Removed auto-sync.
+    // if (visualConfig.value.settings) {
+    //     visualConfig.value.settings.target_rtp = parseFloat(rtp.toFixed(4))
+    // }
 }
 
 onMounted(() => {
@@ -298,7 +387,8 @@ onMounted(() => {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800 p-4 rounded border border-slate-700">
                     <div>
                         <label class="text-xs text-slate-500 block">目标 RTP (Target RTP)</label>
-                        <input v-model.number="visualConfig.settings.target_rtp" type="number" step="0.01" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white focus:ring-2 focus:ring-purple-500 outline-none">
+                        <input v-model.number="visualConfig.settings.target_rtp" type="number" step="0.01" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white focus:ring-2 focus:ring-purple-500 outline-none" title="此值仅供参考，实际 RTP 请使用下方计算器">
+                        <p class="text-[10px] text-slate-500 mt-1">理论数值</p>
                     </div>
                     <div>
                         <label class="text-xs text-slate-500 block">最大赢分倍率 (Max Win Ratio)</label>
@@ -308,7 +398,7 @@ onMounted(() => {
                         <label class="text-xs text-slate-500 block">基础 C 值 (Base C)</label>
                         <input v-model.number="visualConfig.settings.base_c_value" type="number" step="0.001" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white focus:ring-2 focus:ring-purple-500 outline-none">
                         <p class="text-[10px] text-slate-500 mt-1 leading-tight">
-                            控制赢分频率。值越小，波动越大（周期越长）；值越大，小奖越多（周期越短）。
+                            控制赢分频率。当前理论中奖率: <span class="text-green-400" v-if="calculatedHitFreq">{{ (calculatedHitFreq * 100).toFixed(1) }}%</span><span v-else class="text-slate-600">--</span>
                         </p>
                     </div>
                 </div>
@@ -355,7 +445,12 @@ onMounted(() => {
             </div>
 
             <!-- Symbols Section -->
-            <div class="space-y-4 pt-4 border-t border-slate-700">
+            <div class="space-y-4 pt-4 border-t border-slate-700 relative" :class="{ 'opacity-50 pointer-events-none': isBucketSectionDirty }">
+                <div v-if="isBucketSectionDirty" class="absolute inset-0 z-10 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded">
+                    <div class="bg-red-900/90 text-white px-4 py-2 rounded shadow-lg text-sm font-bold border border-red-500">
+                        ⚠️ 权重/桶定义已修改，卷轴配置已锁定。请先保存。
+                    </div>
+                </div>
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-bold text-slate-300">符号 (Symbols)</h3>
                     <button @click="addSymbol" class="text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-white">+ 添加符号</button>
@@ -371,7 +466,7 @@ onMounted(() => {
                                 <label class="text-xs text-slate-500 block">名称 (Name)</label>
                                 <input v-model="sym.name" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-white">
                             </div>
-                            <div class="w-24">
+                            <div class="w-24" v-if="false">
                                 <label class="text-xs text-slate-500 block">基础价值</label>
                                 <input v-model.number="sym.base_value" type="number" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-sm text-white">
                             </div>
@@ -404,7 +499,10 @@ onMounted(() => {
             </div>
 
             <!-- Reels Section -->
-            <div class="space-y-4 pt-4 border-t border-slate-700">
+            <div class="space-y-4 pt-4 border-t border-slate-700 relative" :class="{ 'opacity-50 pointer-events-none': isBucketSectionDirty }">
+                <div v-if="isBucketSectionDirty" class="absolute inset-0 z-10 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded">
+                    <!-- Overlay handled by Symbols section usually covers enough, but good to have here too -->
+                </div>
                 <h3 class="text-lg font-bold text-slate-300">卷轴配置 (Reel Sets)</h3>
                 <div class="overflow-x-auto">
                     <div class="flex gap-4 min-w-max">
@@ -428,7 +526,7 @@ onMounted(() => {
             </div>
 
             <!-- Lines Section -->
-            <div class="space-y-4 pt-4 border-t border-slate-700">
+            <div class="space-y-4 pt-4 border-t border-slate-700 relative" :class="{ 'opacity-50 pointer-events-none': isBucketSectionDirty }">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-bold text-slate-300">中奖线 (Winning Lines)</h3>
                     <button @click="addLine" class="text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-white">+ 添加中奖线</button>
@@ -455,8 +553,34 @@ onMounted(() => {
             </div>
 
             <!-- Buckets Section -->
-            <div class="space-y-4 pt-4 border-t border-slate-700">
-                <h3 class="text-lg font-bold text-slate-300">结果权重 (Result Buckets)</h3>
+            <div class="space-y-4 pt-4 border-t border-slate-700 relative" :class="{ 'opacity-50 pointer-events-none': isReelSectionDirty }">
+                <div v-if="isReelSectionDirty" class="absolute inset-0 z-10 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded">
+                    <div class="bg-yellow-900/90 text-white px-4 py-2 rounded shadow-lg text-sm font-bold border border-yellow-500">
+                        ⚠️ 卷轴配置已修改，统计数据失效。请先保存以重新计算。
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-slate-300">结果权重 (Result Buckets)</h3>
+                    <div class="flex items-center gap-4">
+                        <div v-if="calculatedRTP" class="text-xs flex gap-4 bg-slate-900 px-3 py-1 rounded border border-slate-600">
+                            <div>
+                                <span class="text-slate-500">理论 RTP:</span>
+                                <span class="font-bold ml-1" :class="calculatedRTP.rtp > 1 ? 'text-red-400' : 'text-green-400'">{{ (calculatedRTP.rtp * 100).toFixed(2) }}%</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500">中奖率:</span>
+                                <span class="text-blue-400 ml-1">{{ (calculatedRTP.hitFreq * 100).toFixed(1) }}%</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500">平均倍数:</span>
+                                <span class="text-yellow-400 ml-1">{{ calculatedRTP.avgMult.toFixed(2) }}x</span>
+                            </div>
+                        </div>
+                        <button @click="calculateTheoreticalRTP" class="text-xs bg-purple-600 hover:bg-purple-500 px-3 py-1 rounded text-white font-bold shadow-lg transition-all">
+                            🧮 计算当前 RTP
+                        </button>
+                    </div>
+                </div>
                 <p class="text-xs text-slate-400 bg-slate-800/50 p-2 rounded border border-slate-700/50">
                     "Buckets" (或赢分层级) 定义了不同赢分倍率区间的出现概率权重。
                     <br>引擎会根据 PRD 算法先决定是否中奖，然后根据权重选择一个 Bucket，最后在该 Bucket 的赢分范围内生成具体结果。
@@ -466,7 +590,11 @@ onMounted(() => {
                     <div v-if="key !== 'Loss'" class="bg-slate-800 p-4 rounded border border-slate-700">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-bold text-purple-400">{{ key }}</span>
-                            <span class="text-xs text-slate-500">权重 (Weight)</span>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-500 block">权重 (Weight)</span>
+                                <span class="text-[10px] text-yellow-500 block" v-if="bucket.real_avg_mult">Real Avg: {{ bucket.real_avg_mult.toFixed(2) }}x</span>
+                                <span class="text-[10px] text-slate-500 block" v-else>Est Avg: {{ ((bucket.min_win + bucket.max_win) / 2).toFixed(1) }}x</span>
+                            </div>
                         </div>
                         <input v-model.number="bucket.weight" type="number" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white">
                         <div class="flex gap-2 mt-2">

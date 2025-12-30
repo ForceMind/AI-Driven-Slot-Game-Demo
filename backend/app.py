@@ -110,8 +110,25 @@ async def global_exception_handler(request: Request, exc: Exception):
         }
     )
 
+@app.get("/api/config")
+async def get_config_api(session: SessionData = Depends(get_session)):
+    """Get current game configuration (API alias)"""
+    # Inject real bucket stats if available
+    if hasattr(session.engine, 'bucket_stats'):
+        if "buckets" in session.config:
+            for k, avg_mult in session.engine.bucket_stats.items():
+                if k in session.config["buckets"]:
+                    session.config["buckets"][k]["real_avg_mult"] = avg_mult
+    return session.config
+
 @app.get("/config")
 async def get_config(session: SessionData = Depends(get_session)):
+    # Inject real bucket stats if available
+    if hasattr(session.engine, 'bucket_stats'):
+        if "buckets" in session.config:
+            for k, avg_mult in session.engine.bucket_stats.items():
+                if k in session.config["buckets"]:
+                    session.config["buckets"][k]["real_avg_mult"] = avg_mult
     return session.engine.config
 
 @app.post("/config")
