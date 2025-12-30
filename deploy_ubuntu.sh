@@ -162,14 +162,21 @@ fi
 echo ">>> 重启 Nginx..."
 sudo systemctl restart nginx
 
-echo ">>> 等待后端服务启动 (10秒)..."
-sleep 10
+echo ">>> 等待后端服务启动 (最多等待 60 秒)..."
+# 循环检查端口，每 2 秒检查一次，最多 30 次
+PORT_READY=false
+for i in {1..30}; do
+    if ss -tuln | grep :8000 > /dev/null; then
+        PORT_READY=true
+        echo -e "\n>>> 后端端口 8000 已就绪！"
+        break
+    fi
+    echo -n "."
+    sleep 2
+done
 
-# 检查后端端口
-if ss -tuln | grep :8000 > /dev/null; then
-    echo ">>> [检查] 端口 8000 正在监听 (后端服务存活)"
-else
-    echo ">>> [错误] 端口 8000 未监听！后端服务未启动。"
+if [ "$PORT_READY" = false ]; then
+    echo -e "\n>>> [错误] 等待超时，端口 8000 未监听！后端服务可能启动失败或启动过慢。"
     echo ">>> 正在获取服务日志..."
     sudo journalctl -u $SERVICE_NAME -n 20 --no-pager
     exit 1
