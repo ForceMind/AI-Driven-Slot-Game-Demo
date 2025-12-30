@@ -95,6 +95,17 @@ rm -rf dist
 echo ">>> 构建 Vue.js 应用（生产）..."
 npm run build
 
+# 部署前端文件到 /var/www (解决 Nginx 无法访问 /root 的权限问题)
+echo ">>> 部署前端文件到 /var/www/slot-game..."
+DEPLOY_PATH="/var/www/slot-game"
+sudo mkdir -p $DEPLOY_PATH
+# 清空旧文件
+sudo rm -rf $DEPLOY_PATH/*
+sudo cp -r dist/* $DEPLOY_PATH/
+# 设置权限 (www-data 是 Nginx 默认用户)
+sudo chown -R www-data:www-data $DEPLOY_PATH
+sudo chmod -R 755 $DEPLOY_PATH
+
 # 4. 为后端配置 Systemd 服务
 echo ">>> 配置 Systemd 后端服务..."
 SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
@@ -140,7 +151,7 @@ sudo printf "    listen 80 default_server;\n" >> $NGINX_CONFIG
 sudo printf "    server_name _;\n\n" >> $NGINX_CONFIG
 sudo printf "    # 前端静态文件\n" >> $NGINX_CONFIG
 sudo printf "    location / {\n" >> $NGINX_CONFIG
-sudo printf "        root $FRONTEND_DIR/dist;\n" >> $NGINX_CONFIG
+sudo printf "        root /var/www/slot-game;\n" >> $NGINX_CONFIG
 sudo printf "        index index.html;\n" >> $NGINX_CONFIG
 sudo printf "        try_files \$uri \$uri/ /index.html;\n" >> $NGINX_CONFIG
 sudo printf "    }\n\n" >> $NGINX_CONFIG
