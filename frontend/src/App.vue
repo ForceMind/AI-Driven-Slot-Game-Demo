@@ -252,15 +252,26 @@ const changeBet = (delta) => {
 }
 
 const topUpBalance = async () => {
-    if(!confirm("是否充值 100 🪙?")) return
+    const input = prompt("请输入充值金额 (Please enter top-up amount):", "100")
+    if (input === null) return
+    
+    const amount = parseFloat(input)
+    if (isNaN(amount) || amount <= 0) {
+        alert("请输入有效的金额！")
+        return
+    }
+
     try {
         await fetchAPI('/api/topup', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: 100 })
+            body: JSON.stringify({ amount: amount })
         })
-        gameState.value.balance += 100
-        alert("充值成功！")
+        gameState.value.balance += amount
+        // Update initialBalance to reflect the new "principal"
+        // This ensures Max Win Ratio scales with the new total investment
+        gameState.value.initialBalance += amount
+        alert(`充值成功！已添加 🪙 ${amount}`)
     } catch (e) {
         alert("充值失败: " + e)
     }
