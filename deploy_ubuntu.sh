@@ -42,14 +42,26 @@ echo ">>> 设置后端环境..."
 cd $BACKEND_DIR
 
 # 创建虚拟环境
+# 检查是否存在不兼容的 venv (例如从 Windows 复制过来的)
+if [ -d "venv" ] && [ ! -f "venv/bin/activate" ]; then
+    echo ">>> 检测到损坏或不兼容的虚拟环境 (可能是 Windows 残留)，正在重建..."
+    rm -rf venv
+fi
+
 if [ ! -d "venv" ]; then
     echo ">>> 创建 Python 虚拟环境..."
-    python3 -m venv venv
+    python3 -m venv venv || { echo ">>> [错误] 创建虚拟环境失败，请尝试运行: sudo apt-get install python3-venv"; exit 1; }
 fi
 
 # 安装 Python 依赖
 echo ">>> 安装 Python 依赖..."
-source venv/bin/activate
+if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate
+else
+    echo ">>> [错误] 无法找到 venv/bin/activate，虚拟环境创建可能失败。"
+    exit 1
+fi
+
 pip install --upgrade pip
 pip install -r requirements.txt
 # 确保 uvicorn 已安装
