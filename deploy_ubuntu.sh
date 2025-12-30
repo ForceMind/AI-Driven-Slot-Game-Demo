@@ -125,39 +125,42 @@ sudo systemctl restart $SERVICE_NAME
 echo ">>> 配置 Nginx 以提供前端并代理后端 API..."
 NGINX_CONFIG="/etc/nginx/sites-available/slot-game"
 
-# 使用 cat 写入配置
-# 注意：为了防止 Windows 换行符 (\r) 导致 Nginx 配置错误 (如 location /api/^M)，
-# 我们会在写入后使用 sed 清理文件。
-sudo bash -c "cat > $NGINX_CONFIG" <<EOL
-server {
-    listen 80 default_server;
-    server_name _;
+# 停止可能冲突的 PM2 进程
+if command -v pm2 >/dev/null 2>&1; then
+    echo ">>> [PM2] 停止所有 PM2 进程以防止端口冲突..."
+    pm2 stop all || true
+    # 也可以选择只停止特定的，但为了保险起见...
+fi
 
-    # 前端静态文件
-    location / {
-        root $FRONTEND_DIR/dist;
-        index index.html;
-        try_files \$uri \$uri/ /index.html;
-    }
+# 使用 printf 写入配置，避免 heredoc 和换行符问题
+# 注意：\n 用于换行
+echo ">>> 写入 Nginx 配置文件..."
+sudo printf "server {\n" > $NGINX_CONFIG
+sudo printf "    listen 80 default_server;\n" >> $NGINX_CONFIG
+sudo printf "    server_name _;\n\n" >> $NGINX_CONFIG
+sudo printf "    # 前端静态文件\n" >> $NGINX_CONFIG
+sudo printf "    location / {\n" >> $NGINX_CONFIG
+sudo printf "        root $FRONTEND_DIR/dist;\n" >> $NGINX_CONFIG
+sudo printf "        index index.html;\n" >> $NGINX_CONFIG
+sudo printf "        try_files \$uri \$uri/ /index.html;\n" >> $NGINX_CONFIG
+sudo printf "    }\n\n" >> $NGINX_CONFIG
+sudo printf "    # 后端 API 代理\n" >> $NGINX_CONFIG
+sudo printf "    location /api/ {\n" >> $NGINX_CONFIG
+sudo printf "        # 使用 rewrite 明确重写路径\n" >> $NGINX_CONFIG
+sudo printf "        rewrite ^/api/(.*) /\$1 break;\n" >> $NGINX_CONFIG
+sudo printf "        proxy_pass http://127.0.0.1:8000;\n" >> $NGINX_CONFIG
+sudo printf "        proxy_http_version 1.1;\n" >> $NGINX_CONFIG
+sudo printf "        proxy_set_header Upgrade \$http_upgrade;\n" >> $NGINX_CONFIG
+sudo printf "        proxy_set_header Connection 'upgrade';\n" >> $NGINX_CONFIG
+sudo printf "        proxy_set_header Host \$host;\n" >> $NGINX_CONFIG
+sudo printf "        proxy_cache_bypass \$http_upgrade;\n" >> $NGINX_CONFIG
+sudo printf "        proxy_read_timeout 60s;\n" >> $NGINX_CONFIG
+sudo printf "    }\n" >> $NGINX_CONFIG
+sudo printf "}\n" >> $NGINX_CONFIG
 
-    # 后端 API 代理
-    # 使用 ^~ 提高优先级，确保 /api/ 开头的请求一定被此块处理
-    location ^~ /api/ {
-        proxy_pass http://127.0.0.1:8000/;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        
-        # 增加超时设置，防止长轮询或慢请求断开
-        proxy_connect_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-}
-EOL
-
-# 清理可能存在的 Windows 换行符 (\r)
-echo ">>> 清理 Nginx 配置文件中的 Windows 换行符..."
-sudo sed -i 's/\r$//' $NGINX_CONFIG
+# 打印配置文件内容以供检查 (显示隐藏字符)
+echo ">>> [DEBUG] Nginx 配置文件内容 (cat -A):"
+cat -A $NGINX_CONFIG
 
 # 启用站点配置
 if [ ! -f "/etc/nginx/sites-enabled/slot-game" ]; then
