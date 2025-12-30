@@ -19,7 +19,15 @@ echo ">>> 项目目录: $APP_DIR"
 # 1. 系统更新与依赖安装
 echo ">>> 更新系统并安装依赖..."
 sudo apt-get update
-sudo apt-get install -y python3 python3-pip python3-venv nodejs npm nginx git
+# 注意：如果使用 NodeSource 源，nodejs 包已包含 npm。如果使用 Ubuntu 默认源，可能需要单独安装 npm。
+# 为了避免 "Conflicts: npm" 错误，这里先尝试不显式安装 npm。
+sudo apt-get install -y python3 python3-pip python3-venv nodejs nginx git
+
+# 检查 npm 是否安装成功，如果没有则尝试单独安装
+if ! command -v npm &> /dev/null; then
+    echo ">>> 未检测到 npm，尝试单独安装..."
+    sudo apt-get install -y npm
+fi
 
 # 尝试拉取最新代码
 if [ -d ".git" ]; then
