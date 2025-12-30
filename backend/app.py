@@ -44,11 +44,30 @@ app.add_middleware(
 
 # --- Session Management ---
 
+# Global Engine Cache to avoid re-initializing for same config
+engine_cache: Dict[str, OutcomeEngine] = {}
+
+def get_cached_engine(config: dict) -> OutcomeEngine:
+    """获取或创建缓存的引擎实例"""
+    # 创建一个临时引擎来获取哈希（轻量级，不初始化桶）
+    temp_engine = OutcomeEngine(config_override=config)
+    config_hash = temp_engine._get_config_hash()
+    
+    if config_hash not in engine_cache:
+        logger.info(f"Engine cache miss for hash {config_hash}. Initializing...")
+        # 此时 temp_engine 已经完成了初始化（从磁盘缓存或计算）
+        engine_cache[config_hash] = temp_engine
+    else:
+        logger.info(f"Engine cache hit for hash {config_hash}.")
+    
+    return engine_cache[config_hash]
+
 class SessionData:
     def __init__(self, default_config):
         self.id = str(uuid.uuid4())
         self.config = copy.deepcopy(default_config)
-        self.engine = OutcomeEngine(config_override=self.config)
+        # 使用缓存引擎
+        self.engine = get_cached_engine(self.config)
         self.history = [] # List of dicts
         self.total_bet = 0.0
         self.total_payout = 0.0
@@ -137,8 +156,8 @@ async def update_config(config: dict = Body(...), session: SessionData = Depends
     try:
         # Update session config
         session.config = config
-        # Reload engine with new config
-        session.engine = OutcomeEngine(config_override=session.config)
+        # Reload engine with cached instance
+        session.engine = get_cached_engine(session.config)
         logger.info(f"[{session.id}] Configuration updated successfully")
         return {"status": "ok", "message": "Config updated for this session"}
     except Exception as e:

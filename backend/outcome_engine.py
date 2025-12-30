@@ -2,6 +2,8 @@ import json
 import os
 import random
 import time
+import hashlib
+import pickle
 from typing import List, Dict, Tuple, Any, Optional
 from models import WinningLine
 
@@ -36,6 +38,51 @@ class OutcomeEngine:
         
         self._parse_config()
 
+    def _get_config_hash(self):
+        """
+        生成配置的结构化哈希。只有影响桶内容的参数改变时，哈希才会变。
+        权重、C值、RTP等不影响桶内容的参数不计入哈希。
+        """
+        structural_parts = {
+            "reel_sets": self.config.get("reel_sets"),
+            "symbols": self.config.get("symbols"),
+            "pay_table": self.config.get("pay_table"),
+            "lines": self.config.get("lines"),
+            "reels_length": self.config.get("reels_length"),
+            "buckets_ranges": {k: {"min": v.get("min_win"), "max": v.get("max_win")} 
+                              for k, v in self.config.get("buckets", {}).items()}
+        }
+        config_str = json.dumps(structural_parts, sort_keys=True)
+        return hashlib.md5(config_str.encode()).hexdigest()
+
+    def _load_from_cache(self) -> bool:
+        cache_hash = self._get_config_hash()
+        cache_path = os.path.join(os.path.dirname(__file__), f"cache_{cache_hash}.pkl")
+        
+        if os.path.exists(cache_path):
+            try:
+                with open(cache_path, "rb") as f:
+                    data = pickle.load(f)
+                    self.buckets = data["buckets"]
+                    self.bucket_stats = data["bucket_stats"]
+                return True
+            except Exception as e:
+                print(f"Failed to load cache: {e}")
+        return False
+
+    def _save_to_cache(self):
+        cache_hash = self._get_config_hash()
+        cache_path = os.path.join(os.path.dirname(__file__), f"cache_{cache_hash}.pkl")
+        try:
+            with open(cache_path, "wb") as f:
+                pickle.dump({
+                    "buckets": self.buckets,
+                    "bucket_stats": self.bucket_stats
+                }, f)
+            print(f"Buckets cached to {cache_path}")
+        except Exception as e:
+            print(f"Failed to save cache: {e}")
+
     def _parse_config(self):
         self.reels = self.config["reel_sets"]
         self.symbols = self.config["symbols"]
@@ -55,12 +102,18 @@ class OutcomeEngine:
 
         self.settings = self.config["settings"]
         
-        # 初始化奖池
-        for key in self.buckets_config:
-            self.buckets[key] = []
+        # 尝试从缓存加载
+        if self._load_from_cache():
+            print("Buckets loaded from cache.")
+            self.is_ready = True
+        else:
+            # 初始化奖池
+            for key in self.buckets_config:
+                self.buckets[key] = []
 
-        print("Config loaded/parsed. Initializing buckets...")
-        self.initialize_buckets()
+            print("No valid cache found. Initializing buckets (this may take a few seconds)...")
+            self.initialize_buckets()
+            self._save_to_cache()
         
         # 自动校准 RTP (已禁用：由前端手动计算)
         # self._auto_calibrate_rtp()
