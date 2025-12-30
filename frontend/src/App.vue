@@ -1,7 +1,34 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, provide } from 'vue'
 import SlotGrid from './components/SlotGrid.vue'
 import ConfigModal from './components/ConfigModal.vue'
+
+const sessionId = ref('')
+
+const initSession = () => {
+    let sid = sessionStorage.getItem('slot_session_id')
+    if (!sid) {
+        // Simple UUID generator fallback
+        sid = 'sess_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36)
+        if (window.crypto && window.crypto.randomUUID) {
+            sid = window.crypto.randomUUID()
+        }
+        sessionStorage.setItem('slot_session_id', sid)
+    }
+    sessionId.value = sid
+}
+
+// Global fetch wrapper with session header
+const fetchAPI = async (url, options = {}) => {
+    const headers = {
+        ...options.headers,
+        'X-Session-ID': sessionId.value
+    }
+    return fetch(url, { ...options, headers })
+}
+
+// Provide fetchAPI to child components
+provide('fetchAPI', fetchAPI)
 
 const gameState = ref({
     matrix: [
@@ -86,12 +113,12 @@ const spin = async () => {
             target_rtp: 0.95
         }
 
-        const res = await fetch('/api/spin', {
+        const res = await fetchAPI('/api/spin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 bet: gameState.value.bet, 
-                user_id: "default_user",
+                user_id: sessionId.value, // Use session ID as user ID
                 current_balance: gameState.value.balance,
                 history_rtp: gameState.value.totalWagered > 0 ? (gameState.value.totalWon / gameState.value.totalWagered) : 0,
                 config: llmConfig,
@@ -145,7 +172,7 @@ const runSim = async () => {
     isSimulating.value = true
     simResult.value = null
     try {
-        const res = await fetch('/api/simulate', {
+        const res = await fetchAPI('/api/simulate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(simConfig.value)
@@ -159,7 +186,7 @@ const runSim = async () => {
 }
 
 const loadConfig = async () => {
-    const res = await fetch('/api/config')
+    const res = await fetchAPI('/api/config')
     config.value = await res.json()
 }
 
@@ -175,7 +202,7 @@ const saveConfig = async (payloadOrAutoTune = false) => {
             payload = payloadOrAutoTune
         }
 
-        const res = await fetch(url, {
+        const res = await fetchAPI(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -199,7 +226,7 @@ const saveConfig = async (payloadOrAutoTune = false) => {
 
 const resetUser = async () => {
     if(!confirm("确定要重置用户数据吗？")) return
-    await fetch('/api/reset/default_user', { method: 'POST' })
+    await fetchAPI('/api/reset/' + sessionId.value, { method: 'POST' })
     window.location.reload()
 }
 
@@ -227,7 +254,7 @@ const changeBet = (delta) => {
 const topUpBalance = async () => {
     if(!confirm("是否充值 100 🪙?")) return
     try {
-        await fetch('/api/topup', { 
+        await fetchAPI('/api/topup', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount: 100 })
@@ -287,6 +314,7 @@ const chartData = computed(() => {
 })
 
 onMounted(() => {
+    initSession()
     loadConfig()
 })
 </script>

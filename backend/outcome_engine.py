@@ -6,7 +6,7 @@ from typing import List, Dict, Tuple, Any, Optional
 from models import WinningLine
 
 class OutcomeEngine:
-    def __init__(self):
+    def __init__(self, config_override=None):
         self.config = {}
         self.buckets = {}
         self.reels = []
@@ -14,17 +14,29 @@ class OutcomeEngine:
         self.pay_table = {}
         self.lines = {}
         self.is_ready = False
-        self.load_config()
+        
+        if config_override:
+            self.config = config_override
+            self._parse_config()
+        else:
+            self.load_config()
 
     def load_config(self):
         config_path = os.path.join(os.path.dirname(__file__), "game_config_v2.json")
+        if not os.path.exists(config_path):
+            # Fallback to v1 if v2 not found
+            config_path = os.path.join(os.path.dirname(__file__), "game_config.json")
+            
         if not os.path.exists(config_path):
             print(f"Config not found at {config_path}")
             return
 
         with open(config_path, "r", encoding="utf-8") as f:
             self.config = json.load(f)
+        
+        self._parse_config()
 
+    def _parse_config(self):
         self.reels = self.config["reel_sets"]
         self.symbols = self.config["symbols"]
         self.pay_table = self.config["pay_table"]
@@ -47,7 +59,7 @@ class OutcomeEngine:
         for key in self.buckets_config:
             self.buckets[key] = []
 
-        print("Config loaded. Initializing buckets...")
+        print("Config loaded/parsed. Initializing buckets...")
         self.initialize_buckets()
 
     def initialize_buckets(self):

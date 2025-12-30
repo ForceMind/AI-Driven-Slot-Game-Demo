@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, inject } from 'vue'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -7,6 +7,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:isOpen', 'save'])
+const fetchAPI = inject('fetchAPI')
 
 const activeTab = ref('visual')
 const gameConfigJson = ref('{}')
@@ -25,7 +26,7 @@ const isLoading = ref(false)
 const loadGameConfig = async () => {
   isLoading.value = true
   try {
-    const res = await fetch('/api/config')
+    const res = await fetchAPI('/api/config')
     const data = await res.json()
     gameConfigJson.value = JSON.stringify(data, null, 2)
     
@@ -75,7 +76,7 @@ const loadGameConfig = async () => {
 
 const loadHistory = async () => {
     try {
-        const res = await fetch('/api/history')
+        const res = await fetchAPI('/api/history')
         const data = await res.json()
         historyData.value = data
     } catch (e) {
@@ -521,7 +522,6 @@ onMounted(() => {
                             <th class="px-4 py-2">下注</th>
                             <th class="px-4 py-2">派彩</th>
                             <th class="px-4 py-2">RTP</th>
-                            <th class="px-4 py-2">AI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
@@ -530,7 +530,6 @@ onMounted(() => {
                             <td class="px-4 py-2">🪙 {{ row.Bet }}</td>
                             <td class="px-4 py-2" :class="row.Payout > 0 ? 'text-green-400 font-bold' : 'text-slate-400'">🪙 {{ row.Payout }}</td>
                             <td class="px-4 py-2 text-slate-400">{{ (row.Current_RTP * 100).toFixed(1) }}%</td>
-                            <td class="px-4 py-2 text-slate-500">{{ row.AI_Provider }}</td>
                         </tr>
                     </tbody>
                 </table>
