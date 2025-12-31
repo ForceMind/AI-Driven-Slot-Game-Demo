@@ -68,7 +68,7 @@
       "max_win": 0
     },
     "Win_Tier_1": {
-      "weight": 1000,
+      "weight": 1150,
       "min_win": 0.1,
       "max_win": 5
     },
