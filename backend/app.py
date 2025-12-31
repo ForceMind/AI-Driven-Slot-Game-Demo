@@ -193,7 +193,9 @@ async def spin(req: SpinRequest, session: SessionData = Depends(get_session)):
 
     # 2. Generate Outcome
     try:
-        result = session.engine.spin(user_state.dict())
+        # Pass session.config as runtime_config to ensure session-specific settings (weights, RTP) are used
+        # even if the engine instance is shared/cached.
+        result = session.engine.spin(user_state.dict(), runtime_config=session.config)
     except Exception as e:
         logger.error(f"Engine Failed: {e}")
         raise e

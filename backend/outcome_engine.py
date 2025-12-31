@@ -344,7 +344,7 @@ class OutcomeEngine:
                      
         return "Win_Tier_1" # 兜底
 
-    def spin(self, user_state: Dict[str, Any]) -> Dict[str, Any]:
+    def spin(self, user_state: Dict[str, Any], runtime_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if not self.is_ready:
             return {"error": "Engine not ready"}
 
@@ -363,7 +363,8 @@ class OutcomeEngine:
             total_spins, fail_streak, 
             ignore_safety=ignore_safety,
             max_historical_balance=max_historical_balance,
-            historical_rtp=historical_rtp # 传入 RTP
+            historical_rtp=historical_rtp, # 传入 RTP
+            runtime_config=runtime_config
         )
         if not ignore_safety:
             print(f"[OutcomeEngine] Bet: {bet}, Balance: {balance}, Spins: {total_spins}, FailStreak: {fail_streak}. Selected Bucket: {bucket_name}")
@@ -400,12 +401,30 @@ class OutcomeEngine:
             "fail_streak": new_fail_streak
         }
 
-    def _select_bucket(self, bet: float, balance: float, initial_balance: float, total_spins: int = 0, fail_streak: int = 0, ignore_safety: bool = False, max_historical_balance: float = 0, historical_rtp: float = 0.0) -> str:
+    def _select_bucket(self, bet: float, balance: float, initial_balance: float, total_spins: int = 0, fail_streak: int = 0, ignore_safety: bool = False, max_historical_balance: float = 0, historical_rtp: float = 0.0, runtime_config: Optional[Dict[str, Any]] = None) -> str:
+        
+        # Determine settings and buckets_config to use
+        settings = self.settings
+        buckets_config = self.buckets_config
+        
+        if runtime_config:
+            settings = runtime_config.get("settings", self.settings)
+            raw_buckets = runtime_config.get("buckets", self.buckets_config)
+            # 简单的运行时规范化 (确保有 min_win/max_win)
+            buckets_config = {}
+            for k, v in raw_buckets.items():
+                cfg = v.copy()
+                if "min" in cfg and "min_win" not in cfg: cfg["min_win"] = cfg["min"]
+                if "max" in cfg and "max_win" not in cfg: cfg["max_win"] = cfg["max"]
+                if "min_win" not in cfg: cfg["min_win"] = 0
+                if "max_win" not in cfg: cfg["max_win"] = 0
+                buckets_config[k] = cfg
+
         # 1. PRD逻辑：决定本次是否中奖
-        base_c = self.settings.get("base_c_value", 0.05)
+        base_c = settings.get("base_c_value", 0.05)
         
         # 动态 RTP 调控 (RTP Control)
-        target_rtp = self.settings.get("target_rtp", 0.97)
+        target_rtp = settings.get("target_rtp", 0.97)
         
         # 如果用户玩了足够多把 (比如 > 50)，且 RTP 严重偏离，进行分级修正
         if total_spins > 50:
@@ -432,7 +451,7 @@ class OutcomeEngine:
         is_prd_win = random.random() < win_prob
         
         # 2. 过滤可用奖池
-        weights = {k: v["weight"] for k, v in self.buckets_config.items()}
+        weights = {k: v["weight"] for k, v in buckets_config.items()}
         
         # PRD判定为未中奖，只允许Loss奖池
         if not is_prd_win:
@@ -446,7 +465,7 @@ class OutcomeEngine:
                     weights[k] = 0
         
         # 3. 进度分层检查
-        progress_tiers = self.settings.get("progress_tiers", [])
+        progress_tiers = settings.get("progress_tiers", [])
         if progress_tiers:
             current_tier = None
             # 找到满足当前旋转数的最高层
@@ -464,7 +483,7 @@ class OutcomeEngine:
                             weights[k] = 0
 
         # 4. 高额投注检查
-        high_roller_threshold = self.settings.get("high_roller_threshold", 50.0)
+        high_roller_threshold = settings.get("high_roller_threshold", 50.0)
         if bet < high_roller_threshold:
             # 移除高层奖池
             if "Win_Tier_4" in weights: weights["Win_Tier_4"] = 0
@@ -474,7 +493,7 @@ class OutcomeEngine:
         # 逻辑：严格按照初始余额限制最大余额。
         # 模拟和真实旋转完全共用此逻辑。
         
-        max_win_ratio = self.settings.get("max_win_ratio", 1.2)
+        max_win_ratio = settings.get("max_win_ratio", 1.2)
         max_allowed_balance = initial_balance * max_win_ratio
         
         # 归一化权重
@@ -483,7 +502,7 @@ class OutcomeEngine:
         # 兜底：PRD判定为中奖但所有Win奖池被过滤，强制转Loss
         if total_weight == 0:
             if is_prd_win:
-                weights = {k: v["weight"] for k, v in self.buckets_config.items() if k.startswith("Loss_")}
+                weights = {k: v["weight"] for k, v in buckets_config.items() if k.startswith("Loss_")}
                 total_weight = sum(weights.values())
                 if total_weight == 0: return "Loss_Random"
             else:
@@ -501,7 +520,7 @@ class OutcomeEngine:
                     break
             
             # 校验安全上限——现在无论模拟还是真实都强制执行
-            max_potential_win = self.buckets_config[selected]["max_win"] * bet
+            max_potential_win = buckets_config[selected]["max_win"] * bet
             if balance + max_potential_win > max_allowed_balance:
                 # 超出风险，尝试更低层
                 total_weight -= weights[selected]
