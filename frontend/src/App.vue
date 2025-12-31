@@ -85,10 +85,11 @@ const handleMouseMove = (e) => {
     const index = Math.round(percent * (simResult.value.history.length - 1))
     if (index >= 0 && index < simResult.value.history.length) {
         const point = simResult.value.history[index]
+        const range = (chartData.value.maxBal - chartData.value.minBal) || 1
         hoverPoint.value = {
             ...point,
             x: (index / (simResult.value.history.length - 1)) * 100,
-            y: 100 - ((Number(point.balance) - chartData.value.minBal) / (chartData.value.maxBal - chartData.value.minBal)) * 100
+            y: 100 - ((Number(point.balance) - chartData.value.minBal) / range) * 100
         }
     }
 }
@@ -282,36 +283,30 @@ const chartData = computed(() => {
     const hist = simResult.value.history
     if (hist.length === 0) return null
     
-    // Ensure balances are numbers
+    // --- Balance Axis (Left) ---
     const balances = hist.map(h => Number(h.balance))
-    balances.push(0) // Start at 0
-    
-    // Filter out any NaNs just in case
-    const validBalances = balances.filter(b => !isNaN(b))
-    
-    if (validBalances.length === 0) return null
-
-    const maxBal = Math.max(...validBalances)
-    const minBal = Math.min(...validBalances)
-    const range = maxBal - minBal || 1
+    // We don't push 0 anymore to allow "zooming" into the balance fluctuations
+    const maxBal = Math.max(...balances)
+    const minBal = Math.min(...balances)
+    const balRange = (maxBal - minBal) || 1
     
     const balancePoints = hist.map((h, i) => {
         const val = Number(h.balance)
-        if (isNaN(val)) return `${(i / (hist.length - 1)) * 100},100`
-        
         const x = (i / (hist.length - 1)) * 100
-        const y = 100 - ((val - minBal) / range) * 100
+        const y = 100 - ((val - minBal) / balRange) * 100
         return `${x},${y}`
     }).join(" ")
     
-    // RTP
+    // --- RTP Axis (Right) ---
+    // RTP usually stays around 0.0 to 1.5, we fix it to 0-2.0 for stability
+    const minRtp = 0
     const maxRtp = 2.0
+    const rtpRange = maxRtp - minRtp
+    
     const rtpPoints = hist.map((h, i) => {
         const val = Number(h.rtp)
-        if (isNaN(val)) return `${(i / (hist.length - 1)) * 100},100`
-        
         const x = (i / (hist.length - 1)) * 100
-        const y = 100 - (Math.min(val, maxRtp) / maxRtp) * 100
+        const y = 100 - ((Math.min(val, maxRtp) - minRtp) / rtpRange) * 100
         return `${x},${y}`
     }).join(" ")
     
@@ -320,7 +315,8 @@ const chartData = computed(() => {
         rtpPoints,
         maxBal,
         minBal,
-        maxRtp
+        maxRtp,
+        minRtp
     }
 })
 
@@ -331,7 +327,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="h-[100dvh] flex flex-col items-center p-2 md:p-8 gap-2 md:gap-8 font-sans overflow-hidden bg-slate-950 text-slate-200">
+    <div class="h-[100dvh] flex flex-col items-center p-2 md:p-8 gap-2 md:gap-8 font-sans overflow-hidden bg-slate-950 text-slate-200 select-none touch-manipulation">
         <h1 class="text-xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent text-center flex-shrink-0">
             Slot Master Pro
         </h1>
@@ -422,7 +418,7 @@ onMounted(() => {
             <div class="flex gap-2 w-full md:w-auto h-12 md:h-16">
                 <!-- Fixed width to prevent jumping -->
                 <button @click="spin" :disabled="isSpinning" 
-                        class="flex-1 md:w-48 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-lg md:text-xl disabled:opacity-50 flex items-center justify-center transition-colors active:scale-95 transform">
+                        class="flex-1 md:w-48 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-lg md:text-xl disabled:opacity-50 flex items-center justify-center transition-colors active:scale-95 transform touch-manipulation">
                     {{ isSpinning ? '...' : 'SPIN' }}
                 </button>
 
@@ -511,11 +507,11 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="h-64 w-full bg-slate-900 rounded border border-slate-700 relative p-2 flex">
-                        <!-- Y Axis Labels -->
-                        <div class="w-12 flex flex-col justify-between text-[10px] text-slate-500 text-right pr-2 py-4" v-if="chartData">
-                            <span class="text-green-400">{{ chartData.maxBal.toFixed(0) }}</span>
+                        <!-- Left Y Axis (Balance) -->
+                        <div class="w-14 flex flex-col justify-between text-[10px] text-slate-500 text-right pr-2 py-4" v-if="chartData">
+                            <span class="text-green-400 font-bold">{{ chartData.maxBal.toFixed(0) }}</span>
                             <span>{{ ((chartData.maxBal + chartData.minBal)/2).toFixed(0) }}</span>
-                            <span class="text-red-400">{{ chartData.minBal.toFixed(0) }}</span>
+                            <span class="text-red-400 font-bold">{{ chartData.minBal.toFixed(0) }}</span>
                         </div>
                         
                         <div class="flex-1 relative" v-if="chartData">
@@ -526,11 +522,14 @@ onMounted(() => {
                                 <line x1="0" y1="50" x2="100" y2="50" stroke="#334155" stroke-width="0.5" stroke-dasharray="2"/>
                                 <line x1="0" y1="100" x2="100" y2="100" stroke="#334155" stroke-width="0.5" stroke-dasharray="2"/>
                                 
-                                <!-- Zero Line (if within range) -->
+                                <!-- Zero Line (Balance) -->
                                 <line v-if="chartData.maxBal > 0 && chartData.minBal < 0" 
                                       x1="0" :y1="100 - ((0 - chartData.minBal) / (chartData.maxBal - chartData.minBal)) * 100" 
                                       x2="100" :y2="100 - ((0 - chartData.minBal) / (chartData.maxBal - chartData.minBal)) * 100" 
-                                      stroke="#94a3b8" stroke-width="1" stroke-opacity="0.5" />
+                                      stroke="#34d399" stroke-width="1" stroke-opacity="0.3" />
+                                
+                                <!-- 100% RTP Line -->
+                                <line x1="0" y1="50" x2="100" y2="50" stroke="#60a5fa" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="4" />
 
                                 <!-- Balance Graph (Green) -->
                                 <polyline :points="chartData.balancePoints" fill="none" stroke="#34d399" stroke-width="2" vector-effect="non-scaling-stroke" />
@@ -555,10 +554,17 @@ onMounted(() => {
                             </div>
 
                             <!-- Legend -->
-                            <div class="absolute top-2 right-2 text-xs text-slate-500 flex gap-2 bg-slate-900/80 p-1 rounded">
-                                <span class="text-green-400 font-bold">Balance</span>
-                                <span class="text-blue-400 font-bold">RTP</span>
+                            <div class="absolute top-2 right-2 text-[10px] text-slate-500 flex gap-2 bg-slate-900/80 p-1 rounded">
+                                <span class="text-green-400 font-bold">Balance (Left)</span>
+                                <span class="text-blue-400 font-bold">RTP (Right)</span>
                             </div>
+                        </div>
+
+                        <!-- Right Y Axis (RTP) -->
+                        <div class="w-14 flex flex-col justify-between text-[10px] text-slate-500 text-left pl-2 py-4" v-if="chartData">
+                            <span class="text-blue-400 font-bold">200%</span>
+                            <span>100%</span>
+                            <span class="text-slate-600 font-bold">0%</span>
                         </div>
                     </div>
                 </div>
