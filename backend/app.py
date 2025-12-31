@@ -291,7 +291,8 @@ async def simulate(params: dict = Body(...), session: SessionData = Depends(get_
         }
         
         try:
-            res = engine.spin(user_state)
+            # Pass session.config as runtime_config to ensure simulation uses the current session's settings
+            res = engine.spin(user_state, runtime_config=session.config)
             fail_streak = res.get("fail_streak", 0)
             bal_update = float(res.get("balance_update", 0))
             current_balance += bal_update
