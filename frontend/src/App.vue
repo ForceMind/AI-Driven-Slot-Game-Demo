@@ -331,55 +331,45 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col items-center p-4 md:p-8 gap-4 md:gap-8 font-sans overflow-x-hidden">
-        <h1 class="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent text-center">
+    <div class="h-[100dvh] flex flex-col items-center p-2 md:p-4 gap-2 md:gap-4 font-sans overflow-hidden bg-gray-900 text-white">
+        <h1 class="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent text-center flex-shrink-0">
             Slot Master Pro
         </h1>
         
         <!-- Stats -->
-        <div class="flex flex-wrap justify-center gap-4 md:gap-8 text-sm md:text-xl font-mono w-full">
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">余额 (BALANCE)</span>
-                <span class="text-yellow-400">🪙 {{ gameState.balance.toFixed(2) }}</span>
+        <div class="flex flex-wrap justify-center gap-2 md:gap-8 text-xs md:text-xl font-mono w-full flex-shrink-0">
+            <div class="flex flex-col items-center min-w-[60px] md:min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">余额</span>
+                <span class="text-yellow-400">🪙 {{ gameState.balance.toFixed(0) }}</span>
             </div>
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">赢取 (WIN)</span>
-                <span class="text-green-400">🪙 {{ gameState.lastWin.toFixed(2) }}</span>
+            <div class="flex flex-col items-center min-w-[60px] md:min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">赢取</span>
+                <span class="text-green-400">🪙 {{ gameState.lastWin.toFixed(0) }}</span>
             </div>
-            <div class="flex flex-col items-center group relative cursor-help min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">用户 RTP</span>
+            <div class="flex flex-col items-center group relative cursor-help min-w-[60px] md:min-w-[80px]">
+                <span class="text-[10px] md:text-xs text-slate-500">RTP</span>
                 <span class="text-blue-400 border-b border-dotted border-blue-400/30">{{ gameState.totalWagered > 0 ? ((gameState.totalWon / gameState.totalWagered) * 100).toFixed(1) : '0.0' }}%</span>
-                <div class="absolute top-full mt-2 hidden group-hover:block bg-slate-900 text-xs p-3 rounded border border-slate-700 whitespace-nowrap z-50 shadow-xl text-left">
-                    <div class="text-slate-400 mb-1">统计数据 (Stats)</div>
-                    <div class="flex justify-between gap-4"><span>总下注:</span> <span class="text-white">🪙 {{ gameState.totalWagered.toFixed(2) }}</span></div>
-                    <div class="flex justify-between gap-4"><span>总赢取:</span> <span class="text-green-400">🪙 {{ gameState.totalWon.toFixed(2) }}</span></div>
-                </div>
-            </div>
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">连败 (FAIL STREAK)</span>
-                <span class="text-red-400">{{ gameState.failStreak }}</span>
-            </div>
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">旋转数 (SPINS)</span>
-                <span class="text-purple-400">{{ gameState.totalSpins }}</span>
             </div>
         </div>
 
-        <!-- Grid Area -->
-        <div class="flex flex-col lg:flex-row gap-8 items-start justify-center w-full max-w-5xl relative">
+        <!-- Grid Area (Flexible) -->
+        <div class="flex-1 flex flex-col lg:flex-row gap-4 items-center justify-center w-full max-w-5xl relative min-h-0">
             
-            <!-- Slot Grid (Centered on Desktop) -->
-            <div class="flex-1 flex justify-center w-full max-w-3xl mx-auto">
-                <SlotGrid 
-                    :matrix="gameState.matrix" 
-                    :winning-lines="gameState.winningLines"
-                    :is-spinning="isSpinning"
-                    :lines-config="config?.lines"
-                />
+            <!-- Slot Grid (Centered & Scalable) -->
+            <div class="flex-1 flex items-center justify-center w-full h-full min-h-0">
+                <div class="w-full max-w-3xl aspect-[5/3] max-h-full">
+                    <SlotGrid 
+                        class="w-full h-full"
+                        :matrix="gameState.matrix" 
+                        :winning-lines="gameState.winningLines"
+                        :is-spinning="isSpinning"
+                        :lines-config="config?.lines"
+                    />
+                </div>
             </div>
             
-            <!-- Winning Lines List (Right Side on Large Screens, Bottom on Mobile/Tablet) -->
-            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-48 lg:h-[340px] overflow-y-auto lg:absolute lg:right-[-280px] lg:top-0 shadow-xl order-last lg:order-none">
+            <!-- Winning Lines List (Hidden on mobile portrait to save space, or very small) -->
+            <div class="hidden lg:block bg-slate-900 p-4 rounded-xl border border-slate-800 w-64 h-[340px] overflow-y-auto shadow-xl">
                 <h3 class="text-sm font-bold text-slate-400 mb-2 flex justify-between items-center">
                     <span>中奖线 (Lines)</span>
                     <span v-if="gameState.lastWin > 0" class="text-green-400 text-xs">+ 🪙 {{ gameState.lastWin.toFixed(2) }}</span>
@@ -390,15 +380,7 @@ onMounted(() => {
                             <span>Line {{ line.line_id + 1 }}</span>
                             <div class="text-right">
                                 <div>🪙 {{ line.amount.toFixed(2) }}</div>
-                                <div class="text-[10px] text-slate-500 font-normal">
-                                    {{ (line.amount / gameState.bet).toFixed(1) }}x
-                                </div>
                             </div>
-                        </div>
-                        <div class="text-slate-500 mt-1 flex items-center gap-1">
-                            <span class="bg-slate-900 px-1 rounded text-[10px]">{{ line.count }}</span>
-                            <span>x</span>
-                            <span>{{ getSymbol(line.symbol) }}</span>
                         </div>
                     </div>
                 </div>
@@ -409,37 +391,34 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Controls -->
-        <div class="flex flex-col md:flex-row gap-4 items-center w-full max-w-md z-10">
-            <div class="flex items-center justify-between bg-slate-900 rounded-lg p-2 gap-4 w-full md:w-auto">
-                <button @click="changeBet(-1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">-</button>
+        <!-- Controls (Fixed at bottom) -->
+        <div class="flex flex-col md:flex-row gap-2 md:gap-4 items-center w-full max-w-md z-10 flex-shrink-0 pb-2">
+            <div class="flex items-center justify-between bg-slate-900 rounded-lg p-1 md:p-2 gap-2 w-full md:w-auto">
+                <button @click="changeBet(-1)" class="w-8 h-8 md:w-10 md:h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">-</button>
                 <div class="text-center flex-1 md:w-20">
-                    <div class="text-xs text-slate-500">下注 (BET)</div>
-                    <div class="font-bold">🪙 {{ gameState.bet }}</div>
+                    <div class="text-[10px] md:text-xs text-slate-500">下注</div>
+                    <div class="font-bold text-sm md:text-base">🪙 {{ gameState.bet }}</div>
                 </div>
-                <button @click="changeBet(1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">+</button>
+                <button @click="changeBet(1)" class="w-8 h-8 md:w-10 md:h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">+</button>
             </div>
             
-            <div class="flex gap-2 w-full md:w-auto">
-                <!-- Fixed width to prevent jumping -->
+            <div class="flex gap-2 w-full md:w-auto h-12 md:h-16">
                 <button @click="spin" :disabled="isSpinning" 
-                        class="flex-1 md:w-48 h-16 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-xl disabled:opacity-50 flex items-center justify-center transition-colors">
-                    {{ isSpinning ? '...' : '旋转 (SPIN)' }}
+                        class="flex-1 md:w-48 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-lg md:text-xl disabled:opacity-50 flex items-center justify-center transition-colors">
+                    {{ isSpinning ? '...' : '旋转' }}
                 </button>
 
-                <!-- Refill Button -->
-                <button @click="topUpBalance" class="w-16 md:w-10 h-16 md:h-10 bg-green-600 hover:bg-green-500 text-white rounded-xl md:rounded-full flex items-center justify-center shadow-lg flex-shrink-0" title="充值 (Top Up)">
+                <button @click="topUpBalance" class="w-12 md:w-16 bg-green-600 hover:bg-green-500 text-white rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 font-bold text-xl">
                     +
                 </button>
             </div>
         </div>
 
-        <!-- Debug/Config -->
-        <div class="flex flex-wrap justify-center gap-4 text-xs md:text-sm text-slate-500 pb-8">
-            <button @click="showConfig = true" class="hover:text-white underline">配置 (Config)</button>
-            <button @click="showSim = true" class="hover:text-white underline">快速模拟 (Simulate)</button>
-            <button @click="resetUser" class="hover:text-white underline">重置用户 (Reset)</button>
-            <span class="ml-4 hidden md:inline">Bucket: {{ gameState.bucket }}</span>
+        <!-- Debug/Config Links -->
+        <div class="flex flex-wrap justify-center gap-4 text-[10px] md:text-sm text-slate-500 pb-2 md:pb-4 flex-shrink-0">
+            <button @click="showConfig = true" class="hover:text-white underline">配置</button>
+            <button @click="showSim = true" class="hover:text-white underline">模拟</button>
+            <button @click="resetUser" class="hover:text-white underline">重置</button>
         </div>
 
         <!-- Config Modal -->

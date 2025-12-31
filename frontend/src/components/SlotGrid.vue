@@ -62,16 +62,16 @@ const isWinningCell = (row, col) => {
 </script>
 
 <template>
-  <div class="bg-gray-800 p-2 md:p-4 rounded-xl border-4 border-yellow-600 shadow-2xl relative overflow-hidden w-full max-w-full">
-    <div class="grid grid-rows-3 gap-1 md:gap-2">
+  <div class="bg-gray-800 p-1 md:p-4 rounded-xl border-2 md:border-4 border-yellow-600 shadow-2xl relative overflow-hidden w-full h-full flex flex-col justify-center">
+    <div class="grid grid-rows-3 gap-1 md:gap-2 h-full">
       <!-- 
         matrix is 3x5. 
         row index: 0, 1, 2
         col index: 0, 1, 2, 3, 4
       -->
-      <div v-for="(row, rIndex) in matrix" :key="rIndex" class="grid grid-cols-5 gap-1 md:gap-2">
+      <div v-for="(row, rIndex) in matrix" :key="rIndex" class="grid grid-cols-5 gap-1 md:gap-2 h-full">
         <div v-for="(symbol, cIndex) in row" :key="cIndex" 
-             class="aspect-square bg-gray-900 rounded-lg flex items-center justify-center text-2xl sm:text-3xl md:text-5xl select-none transition-all duration-300"
+             class="bg-gray-900 rounded-lg flex items-center justify-center text-2xl sm:text-3xl md:text-5xl select-none transition-all duration-300 h-full w-full"
              :class="{
                'animate-pulse bg-yellow-900': isWinningCell(rIndex, cIndex),
                'blur-sm': isSpinning

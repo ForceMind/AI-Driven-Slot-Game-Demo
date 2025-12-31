@@ -300,13 +300,12 @@ async def simulate(params: dict = Body(...), session: SessionData = Depends(get_
             total_wagered += bet
             total_won += res["total_payout"]
             
-            sample_rate = max(1, count // 1000)
-            if i == 0 or i == count - 1 or i % sample_rate == 0:
-                history.append({
-                    "spin": i + 1,
-                    "balance": current_balance,
-                    "rtp": (total_won / total_wagered) if total_wagered > 0 else 0
-                })
+            # No sampling - return all points for high precision
+            history.append({
+                "spin": i + 1,
+                "balance": current_balance,
+                "rtp": (total_won / total_wagered) if total_wagered > 0 else 0
+            })
         except Exception as e:
             logger.error(f"Simulation error: {e}")
             break
