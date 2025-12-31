@@ -331,56 +331,48 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col items-center p-4 md:p-8 gap-4 md:gap-8 font-sans overflow-x-hidden">
-        <h1 class="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent text-center">
+    <div class="h-[100dvh] flex flex-col items-center p-2 md:p-8 gap-2 md:gap-8 font-sans overflow-hidden bg-slate-950 text-slate-200">
+        <h1 class="text-xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent text-center flex-shrink-0">
             Slot Master Pro
         </h1>
         
         <!-- Stats -->
-        <div class="flex flex-wrap justify-center gap-4 md:gap-8 text-sm md:text-xl font-mono w-full">
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">余额 (BALANCE)</span>
-                <span class="text-yellow-400">🪙 {{ gameState.balance.toFixed(2) }}</span>
+        <div class="flex flex-wrap justify-center gap-2 md:gap-8 text-sm md:text-xl font-mono w-full flex-shrink-0 bg-slate-900/50 p-2 rounded-lg">
+            <div class="flex flex-col items-center min-w-[70px] md:min-w-[80px]">
+                <span class="text-[11px] md:text-xs text-slate-500">余额 (Balance)</span>
+                <span class="text-yellow-400">🪙 {{ gameState.balance.toFixed(0) }}</span>
             </div>
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">赢取 (WIN)</span>
-                <span class="text-green-400">🪙 {{ gameState.lastWin.toFixed(2) }}</span>
+            <div class="flex flex-col items-center min-w-[70px] md:min-w-[80px]">
+                <span class="text-[11px] md:text-xs text-slate-500">赢取 (Win)</span>
+                <span class="text-green-400">🪙 {{ gameState.lastWin.toFixed(0) }}</span>
             </div>
-            <div class="flex flex-col items-center group relative cursor-help min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">用户 RTP</span>
-                <span class="text-blue-400 border-b border-dotted border-blue-400/30">{{ gameState.totalWagered > 0 ? ((gameState.totalWon / gameState.totalWagered) * 100).toFixed(1) : '0.0' }}%</span>
-                <div class="absolute top-full mt-2 hidden group-hover:block bg-slate-900 text-xs p-3 rounded border border-slate-700 whitespace-nowrap z-50 shadow-xl text-left">
-                    <div class="text-slate-400 mb-1">统计数据 (Stats)</div>
-                    <div class="flex justify-between gap-4"><span>总下注:</span> <span class="text-white">🪙 {{ gameState.totalWagered.toFixed(2) }}</span></div>
-                    <div class="flex justify-between gap-4"><span>总赢取:</span> <span class="text-green-400">🪙 {{ gameState.totalWon.toFixed(2) }}</span></div>
-                </div>
+            <div class="flex flex-col items-center group relative cursor-help min-w-[70px] md:min-w-[80px]">
+                <span class="text-[11px] md:text-xs text-slate-500">RTP</span>
+                <span class="text-blue-400 border-b border-dotted border-blue-400/30">{{ gameState.totalWagered > 0 ? ((gameState.totalWon / gameState.totalWagered) * 100).toFixed(0) : '0' }}%</span>
             </div>
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">连败 (FAIL STREAK)</span>
+            <div class="flex flex-col items-center min-w-[70px] md:min-w-[80px]">
+                <span class="text-[11px] md:text-xs text-slate-500">连败 (Streak)</span>
                 <span class="text-red-400">{{ gameState.failStreak }}</span>
-            </div>
-            <div class="flex flex-col items-center min-w-[80px]">
-                <span class="text-[10px] md:text-xs text-slate-500">旋转数 (SPINS)</span>
-                <span class="text-purple-400">{{ gameState.totalSpins }}</span>
             </div>
         </div>
 
         <!-- Grid Area -->
-        <div class="flex flex-col lg:flex-row gap-8 items-start justify-center w-full max-w-5xl relative">
+        <div class="flex-1 flex flex-col lg:flex-row gap-4 items-center justify-center w-full max-w-5xl relative min-h-0">
             
-            <!-- Slot Grid (Centered on Desktop) -->
-            <div class="flex-1 flex justify-center w-full max-w-3xl mx-auto">
+            <!-- Slot Grid (Centered on Desktop, Scaled down on Mobile) -->
+            <div class="flex justify-center items-center w-full max-w-[95vw] md:max-w-3xl mx-auto flex-shrink-0">
                 <SlotGrid 
                     :matrix="gameState.matrix" 
                     :winning-lines="gameState.winningLines"
                     :is-spinning="isSpinning"
                     :lines-config="config?.lines"
+                    class="max-h-[50vh] lg:max-h-full w-auto aspect-[5/3]"
                 />
             </div>
             
             <!-- Winning Lines List (Right Side on Large Screens, Bottom on Mobile/Tablet) -->
             <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 w-full lg:w-64 h-48 lg:h-[340px] overflow-y-auto lg:absolute lg:right-[-280px] lg:top-0 shadow-xl order-last lg:order-none">
-                <h3 class="text-sm font-bold text-slate-400 mb-2 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-slate-400 mb-2 flex justify-between items-center sticky top-0 bg-slate-900 pb-2 border-b border-slate-800">
                     <span>中奖线 (Lines)</span>
                     <span v-if="gameState.lastWin > 0" class="text-green-400 text-xs">+ 🪙 {{ gameState.lastWin.toFixed(2) }}</span>
                 </h3>
@@ -390,56 +382,47 @@ onMounted(() => {
                             <span>Line {{ line.line_id + 1 }}</span>
                             <div class="text-right">
                                 <div>🪙 {{ line.amount.toFixed(2) }}</div>
-                                <div class="text-[10px] text-slate-500 font-normal">
-                                    {{ (line.amount / gameState.bet).toFixed(1) }}x
-                                </div>
                             </div>
-                        </div>
-                        <div class="text-slate-500 mt-1 flex items-center gap-1">
-                            <span class="bg-slate-900 px-1 rounded text-[10px]">{{ line.count }}</span>
-                            <span>x</span>
-                            <span>{{ getSymbol(line.symbol) }}</span>
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-xs text-slate-600 text-center mt-10 flex flex-col items-center gap-2">
+                <div v-else class="text-xs text-slate-600 text-center mt-4 lg:mt-10 flex flex-col items-center gap-2">
                     <span class="text-2xl opacity-20">🎰</span>
-                    <span>无中奖</span>
+                    <span>无中奖 (No Win)</span>
                 </div>
             </div>
         </div>
 
         <!-- Controls -->
-        <div class="flex flex-col md:flex-row gap-4 items-center w-full max-w-md z-10">
-            <div class="flex items-center justify-between bg-slate-900 rounded-lg p-2 gap-4 w-full md:w-auto">
-                <button @click="changeBet(-1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">-</button>
+        <div class="flex flex-col md:flex-row gap-2 md:gap-4 items-center w-full max-w-md z-10 flex-shrink-0 pb-2">
+            <div class="flex items-center justify-between bg-slate-900 rounded-lg p-1 gap-2 w-full md:w-auto">
+                <button @click="changeBet(-1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0 text-xl">-</button>
                 <div class="text-center flex-1 md:w-20">
-                    <div class="text-xs text-slate-500">下注 (BET)</div>
-                    <div class="font-bold">🪙 {{ gameState.bet }}</div>
+                    <div class="text-[11px] text-slate-500">下注 (Bet)</div>
+                    <div class="font-bold text-base">🪙 {{ gameState.bet }}</div>
                 </div>
-                <button @click="changeBet(1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0">+</button>
+                <button @click="changeBet(1)" class="w-10 h-10 bg-slate-800 rounded hover:bg-slate-700 flex-shrink-0 text-xl">+</button>
             </div>
             
-            <div class="flex gap-2 w-full md:w-auto">
+            <div class="flex gap-2 w-full md:w-auto h-12 md:h-16">
                 <!-- Fixed width to prevent jumping -->
                 <button @click="spin" :disabled="isSpinning" 
-                        class="flex-1 md:w-48 h-16 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-xl disabled:opacity-50 flex items-center justify-center transition-colors">
-                    {{ isSpinning ? '...' : '旋转 (SPIN)' }}
+                        class="flex-1 md:w-48 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg text-lg md:text-xl disabled:opacity-50 flex items-center justify-center transition-colors active:scale-95 transform">
+                    {{ isSpinning ? '...' : 'SPIN' }}
                 </button>
 
                 <!-- Refill Button -->
-                <button @click="topUpBalance" class="w-16 md:w-10 h-16 md:h-10 bg-green-600 hover:bg-green-500 text-white rounded-xl md:rounded-full flex items-center justify-center shadow-lg flex-shrink-0" title="充值 (Top Up)">
+                <button @click="topUpBalance" class="w-12 md:w-16 bg-green-600 hover:bg-green-500 text-white rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 text-xl" title="充值">
                     +
                 </button>
             </div>
         </div>
 
         <!-- Debug/Config -->
-        <div class="flex flex-wrap justify-center gap-4 text-xs md:text-sm text-slate-500 pb-8">
+        <div class="flex flex-wrap justify-center gap-4 text-xs text-slate-500 pb-2 md:pb-8 flex-shrink-0">
             <button @click="showConfig = true" class="hover:text-white underline">配置 (Config)</button>
-            <button @click="showSim = true" class="hover:text-white underline">快速模拟 (Simulate)</button>
-            <button @click="resetUser" class="hover:text-white underline">重置用户 (Reset)</button>
-            <span class="ml-4 hidden md:inline">Bucket: {{ gameState.bucket }}</span>
+            <button @click="showSim = true" class="hover:text-white underline">模拟 (Sim)</button>
+            <button @click="resetUser" class="hover:text-white underline">重置 (Reset)</button>
         </div>
 
         <!-- Config Modal -->
@@ -463,18 +446,18 @@ onMounted(() => {
                 
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div>
-                        <label class="text-xs text-slate-400">旋转次数</label>
+                        <label class="text-xs text-slate-400">旋转次数 (Spins) <span class="text-[10px] text-slate-500">(Max 1M)</span></label>
                         <input v-model.number="simConfig.n_spins" type="number" class="w-full bg-slate-800 p-2 rounded mt-1 text-white">
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400">单次下注</label>
+                        <label class="text-xs text-slate-400">单次下注 (Bet)</label>
                         <input v-model.number="simConfig.bet" type="number" class="w-full bg-slate-800 p-2 rounded mt-1 text-white">
                     </div>
                 </div>
 
                 <button @click="runSim" :disabled="isSimulating"
                         class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded font-bold text-white disabled:opacity-50 mb-6">
-                    {{ isSimulating ? '模拟计算中...' : '开始纯数学模拟' }}
+                    {{ isSimulating ? '模拟计算中... (Simulating...)' : '开始纯数学模拟 (Start Simulation)' }}
                 </button>
 
                 <div v-if="simResult" class="bg-slate-800 p-4 rounded-lg">
@@ -491,14 +474,23 @@ onMounted(() => {
                             <div class="text-xl font-bold text-white">🪙 {{ (simConfig.n_spins * simConfig.bet).toFixed(0) }}</div>
                         </div>
                         <div>
-                            <div class="text-xs text-slate-400">实际 RTP</div>
+                            <div class="text-xs text-slate-400">实际 RTP (Real RTP)</div>
                             <div class="text-xl font-bold text-blue-400">{{ ((simResult.total_rtp ?? 0) * 100).toFixed(2) }}%</div>
                         </div>
                     </div>
 
                     <!-- Chart -->
-                    <div class="text-xs text-slate-500 mb-2 text-center">
-                        * 余额曲线 (Balance) vs RTP 曲线 (RTP)
+                    <div class="text-xs text-slate-500 mb-2 text-center flex justify-between px-4 items-start">
+                        <span>* 余额曲线 (Balance) vs RTP 曲线 (RTP)</span>
+                        <div class="flex flex-col items-end">
+                            <span v-if="simResult?.history" class="text-yellow-500 font-bold">Actual Points: {{ simResult.history.length }}</span>
+                            <div v-if="simResult?.debug_info" class="text-[10px] text-slate-500 text-right">
+                                Req: {{ simResult.debug_info.requested_spins }} | Err: {{ simResult.debug_info.errors.length }} | LB: {{ simResult.debug_info.loss_bucket_size }}
+                                <div v-if="simResult.debug_info.errors.length > 0" class="text-red-400 max-w-[200px] truncate" :title="simResult.debug_info.errors[0]">
+                                    {{ simResult.debug_info.errors[0] }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="h-64 w-full bg-slate-900 rounded border border-slate-700 relative p-2 flex">
                         <!-- Y Axis Labels -->

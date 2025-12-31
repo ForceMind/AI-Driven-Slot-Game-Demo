@@ -71,7 +71,7 @@ const isWinningCell = (row, col) => {
       -->
       <div v-for="(row, rIndex) in matrix" :key="rIndex" class="grid grid-cols-5 gap-1 md:gap-2">
         <div v-for="(symbol, cIndex) in row" :key="cIndex" 
-             class="aspect-square bg-gray-900 rounded-lg flex items-center justify-center text-2xl sm:text-3xl md:text-5xl select-none transition-all duration-300"
+             class="aspect-square bg-gray-900 rounded-lg flex items-center justify-center text-xl sm:text-3xl md:text-5xl select-none transition-all duration-300"
              :class="{
                'animate-pulse bg-yellow-900': isWinningCell(rIndex, cIndex),
                'blur-sm': isSpinning

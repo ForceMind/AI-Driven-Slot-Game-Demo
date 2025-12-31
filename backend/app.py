@@ -256,10 +256,14 @@ async def simulate(params: dict = Body(...), session: SessionData = Depends(get_
     Fast simulation endpoint.
     Uses the session's current engine configuration.
     """
-    count = params.get("spins", 100)
-    logger.info(f"[{session.id}] SIMULATION START | Spins: {count}")
+    # Support both 'spins' and 'n_spins' keys
+    # Default to 1000 if not provided
+    count = int(params.get("spins", params.get("n_spins", 1000)))
+    print(f"DEBUG: Received simulation request for {count} spins")
+    logger.info(f"[{session.id}] SIMULATION START | Spins: {count} | Params: {params}")
     
-    if count > 10000: count = 10000
+    if count > 1000000: count = 1000000
+    if count < 1: count = 1000
     bet = params.get("bet", 10)
     
     # 理论上模拟需要足够的本金来支撑所有旋转
@@ -273,9 +277,17 @@ async def simulate(params: dict = Body(...), session: SessionData = Depends(get_
     total_won = 0
     fail_streak = 0
     history = []
+    errors = []
     
     # Use session engine
     engine = session.engine
+    
+    # Debug: Check bucket sizes
+    # Force Reload Trigger
+    loss_bucket_size = -1
+    if hasattr(engine, "buckets"):
+        loss_bucket_size = len(engine.buckets.get("Loss_Random", []))
+        logger.info(f"[{session.id}] Loss_Random size: {loss_bucket_size}")
     
     for i in range(count):
         current_rtp = (total_won / total_wagered) if total_wagered > 0 else 0
@@ -300,24 +312,35 @@ async def simulate(params: dict = Body(...), session: SessionData = Depends(get_
             total_wagered += bet
             total_won += res["total_payout"]
             
-            sample_rate = max(1, count // 1000)
-            if i == 0 or i == count - 1 or i % sample_rate == 0:
-                history.append({
-                    "spin": i + 1,
-                    "balance": current_balance,
-                    "rtp": (total_won / total_wagered) if total_wagered > 0 else 0
-                })
+            # User requested ALL data points for precision
+            history.append({
+                "spin": i + 1,
+                "balance": current_balance,
+                "rtp": (total_won / total_wagered) if total_wagered > 0 else 0
+            })
         except Exception as e:
-            logger.error(f"Simulation error: {e}")
-            break
+            error_msg = f"Sim error at spin {i+1}: {str(e)}"
+            logger.error(error_msg)
+            errors.append(error_msg)
+            # If we have too many errors, abort
+            if len(errors) > 10:
+                break
             
     final_rtp = (total_won / total_wagered) if total_wagered > 0 else 0
     
+    logger.info(f"[{session.id}] SIMULATION END | Generated {len(history)} points")
+
     return {
         "final_balance": current_balance,
         "net_profit": current_balance - initial_balance,
         "total_rtp": final_rtp,
-        "history": history
+        "history": history,
+        "debug_info": {
+            "requested_spins": count,
+            "received_params": params,
+            "errors": errors,
+            "loss_bucket_size": loss_bucket_size
+        }
     }
 
 @app.get("/history")
