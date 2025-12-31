@@ -347,12 +347,27 @@ onMounted(() => {
                 <span class="text-green-400">🪙 {{ gameState.lastWin.toFixed(0) }}</span>
             </div>
             <div class="flex flex-col items-center group relative cursor-help min-w-[70px] md:min-w-[80px]">
-                <span class="text-[11px] md:text-xs text-slate-500">RTP</span>
-                <span class="text-blue-400 border-b border-dotted border-blue-400/30">{{ gameState.totalWagered > 0 ? ((gameState.totalWon / gameState.totalWagered) * 100).toFixed(0) : '0' }}%</span>
+                <span class="text-[11px] md:text-xs text-slate-500">用户 RTP</span>
+                <span class="text-blue-400 border-b border-dotted border-blue-400/30">{{ gameState.totalWagered > 0 ? ((gameState.totalWon / gameState.totalWagered) * 100).toFixed(1) : '0' }}%</span>
+                <!-- Tooltip -->
+                <div class="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 bg-slate-800 p-2 rounded shadow-xl text-[10px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 border border-slate-700">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-slate-400">总下注:</span>
+                        <span class="text-white">🪙 {{ gameState.totalWagered.toFixed(0) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">总赢取:</span>
+                        <span class="text-green-400">🪙 {{ gameState.totalWon.toFixed(0) }}</span>
+                    </div>
+                </div>
             </div>
             <div class="flex flex-col items-center min-w-[70px] md:min-w-[80px]">
                 <span class="text-[11px] md:text-xs text-slate-500">连败 (Streak)</span>
                 <span class="text-red-400">{{ gameState.failStreak }}</span>
+            </div>
+            <div class="flex flex-col items-center min-w-[70px] md:min-w-[80px]">
+                <span class="text-[11px] md:text-xs text-slate-500">旋转数 (Spins)</span>
+                <span class="text-purple-400">{{ gameState.totalSpins }}</span>
             </div>
         </div>
 
@@ -471,7 +486,10 @@ onMounted(() => {
                         <!-- Removed Final Balance as it is redundant with Net Profit in pure sim mode -->
                         <div>
                             <div class="text-xs text-slate-400">总下注 (Total Bet)</div>
-                            <div class="text-xl font-bold text-white">🪙 {{ (simConfig.n_spins * simConfig.bet).toFixed(0) }}</div>
+                            <div class="text-xl font-bold text-white">
+                                🪙 {{ (simConfig.n_spins * simConfig.bet).toFixed(0) }}
+                                <span class="text-xs text-slate-400 block">({{ simConfig.n_spins }} spins)</span>
+                            </div>
                         </div>
                         <div>
                             <div class="text-xs text-slate-400">实际 RTP (Real RTP)</div>
