@@ -412,17 +412,17 @@ class OutcomeEngine:
             rtp_ratio = historical_rtp / target_rtp if target_rtp > 0 else 1.0
             
             if rtp_ratio < 0.5:   # 极度亏损 (RTP < 50% Target)
-                base_c *= 2.0     # 强力提升中奖率
+                base_c *= 1.5     # 强力提升中奖率
             elif rtp_ratio < 0.8: # 明显亏损 (RTP < 80% Target)
-                base_c *= 1.5     # 提升中奖率
+                base_c *= 1.2     # 提升中奖率
             elif rtp_ratio < 0.95: # 轻微亏损
                 base_c *= 1.1     # 微调
             elif rtp_ratio > 2.0: # 极度盈利 (RTP > 200% Target)
-                base_c *= 0.5     # 强力降低中奖率
+                base_c *= 0.3     # 强力降低中奖率
             elif rtp_ratio > 1.5: # 明显盈利 (RTP > 150% Target)
-                base_c *= 0.7     # 降低中奖率
+                base_c *= 0.5     # 降低中奖率
             elif rtp_ratio > 1.05: # 轻微盈利
-                base_c *= 0.9     # 微调
+                base_c *= 0.6     # 微调
 
         win_prob = base_c * (fail_streak + 1)
         

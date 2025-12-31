@@ -390,7 +390,7 @@
     "high_roller_threshold": 50,
     "max_historical_balance_buffer": 1.2,
     "max_win_ratio": 1.1,
-    "base_c_value": 0.15,
+    "base_c_value": 0.08,
     "target_rtp": 0.97,
     "progress_tiers": [
       {

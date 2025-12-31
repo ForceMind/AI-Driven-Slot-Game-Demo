@@ -36,7 +36,7 @@ class GameLogger:
             ])
     def get_history_stats(self):
         """从 CSV 中计算历史总投注、总派彩和 RTP"""
-        # 初始虚拟样本，防止前几局 RTP 波动过大导致 AI 走极端
+        # 初始虚拟样本，防止前几局 RTP 波动过大导致走极端
         total_bet = 100.0 
         total_payout = 95.0
         try:
