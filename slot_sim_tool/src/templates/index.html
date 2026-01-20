@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot 游戏模拟器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        /* Modal for chart zoom */
+        .chart-zoom-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            padding: 20px;
+        }
+        .chart-zoom-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            height: 90%;
+            border-radius: 8px;
+            position: relative;
+        }
+        .close-zoom {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            z-index: 1001;
+        }
+        .close-zoom:hover,
+        .close-zoom:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">🎰 Slot 数据模拟系统</h1>
+            <p class="text-gray-600">基于 JSON 数据集的 Slot 游戏数学模型仿真与分析工具。</p>
+        </header>
+        
+        <!-- Detailed Stats Headers -->
+        <div id="detailedStatsHeader" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6 hidden">
+             <div class="bg-white p-3 rounded shadow border-l-4 border-blue-500">
+                 <div class="text-xs text-gray-500 uppercase">Hit Rate</div>
+                 <div id="stat_hit_rate" class="text-xl font-bold text-gray-800">--</div>
+             </div>
+             <div class="bg-white p-3 rounded shadow border-l-4 border-purple-500">
+                 <div class="text-xs text-gray-500 uppercase">Volatility (SD)</div>
+                 <div id="stat_volatility" class="text-xl font-bold text-gray-800">--</div>
+             </div>
+             <div class="bg-white p-3 rounded shadow border-l-4 border-red-500">
+                 <div class="text-xs text-gray-500 uppercase">Max Drawdown</div>
+                 <div id="stat_max_dd" class="text-xl font-bold text-gray-800">--</div>
+             </div>
+             <div class="bg-white p-3 rounded shadow border-l-4 border-green-500">
+                 <div class="text-xs text-gray-500 uppercase">Avg Win (Mult)</div>
+                 <div id="stat_avg_win" class="text-xl font-bold text-gray-800">--</div>
+             </div>
+             <div class="bg-white p-3 rounded shadow border-l-4 border-yellow-500">
+                 <div class="text-xs text-gray-500 uppercase">Big Wins (50x+)</div>
+                 <div id="stat_big_wins" class="text-xl font-bold text-gray-800">--</div>
+             </div>
+             <div class="bg-white p-3 rounded shadow border-l-4 border-pink-500">
+                 <div class="text-xs text-gray-500 uppercase">Max Win (Mult)</div>
+                 <div id="stat_max_win" class="text-xl font-bold text-gray-800">--</div>
+             </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar Controls -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow h-fit">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">参数配置</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">游戏配置文件</label>
+                    <select id="gameFile" class="w-full border-gray-300 rounded-md shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500">
+                        {% for game in games %}
+                        <option value="{{ game }}">{{ game }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Simulation Params -->
+                <div class="mb-4 grid grid-cols-2 gap-2">
+                    <div>
+                         <label class="block text-xs font-medium text-gray-700 mb-1">模拟旋转 (Spins)</label>
+                         <input type="number" id="spins" value="1000" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-right text-sm">
+                    </div>
+                    <div>
+                         <label class="block text-xs font-medium text-gray-700 mb-1">模拟人数 (Users)</label>
+                         <input type="number" id="num_users" value="1" min="1" max="100" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-right text-sm">
+                    </div>
+                </div>
+
+                <!-- Player Params -->
+                <div class="border-t border-b py-3 mb-4 bg-gray-50 -mx-6 px-6">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">玩家属性配置 (Player Profile)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">初始余额 (Initial Money)</label>
+                            <input type="number" id="initial_balance" value="10000" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-right">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">单注金额 (Bet)</label>
+                                <input type="number" id="bet" value="10" class="w-full border-gray-300 rounded-md shadow-sm border p-2 text-right">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">VIP 等级 (Level)</label>
+                                <select id="vip_level" class="w-full border-gray-300 rounded-md shadow-sm border p-2">
+                                    <option value="0">VIP 0</option>
+                                    <option value="1">VIP 1</option>
+                                    <option value="2">VIP 2</option>
+                                    <option value="3">VIP 3</option>
+                                    <option value="4">VIP 4</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                     <button onclick="toggleConfigModal()" class="w-full text-blue-600 hover:text-blue-800 text-sm font-medium underline mb-4 text-center block">
+                        高级策略配置 (Advanced Config)
+                    </button>
+                </div>
+
+                <div class="mb-2">
+                    <button onclick="runSim()" id="runBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-150 ease-in-out flex justify-center items-center">
+                        <span>开始模拟</span>
+                        <svg id="loadingIcon" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="resultStats" class="mt-8 hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">统计数据</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">最终 RTP:</span>
+                            <span id="statRtp" class="font-bold"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">总下注额:</span>
+                            <span id="statWagered"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">总奖金额:</span>
+                            <span id="statWon"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">盈亏统计:</span>
+                            <span id="statDelta" class="font-bold"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Area -->
+            <div class="lg:col-span-3 space-y-8">
+                <!-- Balance Chart -->
+                <div class="bg-white p-6 rounded-lg shadow relative group">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium text-gray-800">资金变化曲线 (Balance History)</h3>
+                        <button onclick="zoomChart('balance')" class="text-sm text-blue-500 hover:underline">放大查看 (Zoom)</button>
+                    </div>
+                    <div class="chart-container relative h-64" id="chartBalanceContainer">
+                        <canvas id="chartBalance"></canvas>
+                         <div id="chartBalancePlaceholder" class="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-50 rounded pointer-events-none">
+                            请点击“开始模拟”查看曲线
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- RTP Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                         <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium text-gray-800">RTP 收敛演变</h3>
+                            <button onclick="zoomChart('rtp')" class="text-sm text-blue-500 hover:underline">放大 (Zoom)</button>
+                        </div>
+                        <div class="chart-container relative h-48" id="chartRtpContainer">
+                            <canvas id="chartRtp"></canvas>
+                             <div id="chartRtpPlaceholder" class="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-50 rounded pointer-events-none">
+                                等待数据分析...
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Dist Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                         <div class="flex justify-between items-center mb-4">
+                             <h3 class="text-lg font-medium text-gray-800">中奖分布 (金额频次)</h3>
+                             <button onclick="zoomChart('dist')" class="text-sm text-blue-500 hover:underline">放大 (Zoom)</button>
+                         </div>
+                        <div class="chart-container relative h-48" id="chartDistContainer">
+                            <canvas id="chartDist"></canvas>
+                            <div id="chartDistPlaceholder" class="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-50 rounded pointer-events-none">
+                                等待数据分析...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Zoom Modal -->
+    <div id="zoomModal" class="chart-zoom-modal">
+        <div class="chart-zoom-content">
+            <span class="close-zoom" onclick="closeZoom()">&times;</span>
+            <div style="width: 100%; height: 100%;">
+                <canvas id="zoomedCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Config Modal -->
+    <div id="configModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-5 mx-auto p-5 border w-3/4 max-w-4xl shadow-lg rounded-md bg-white mb-20">
+            <div class="mt-3">
+                <h3 class="text-xl font-bold text-gray-900 text-center mb-6">高级策略配置 (Strategy Config)</h3>
+                
+                <div class="px-4 py-3 space-y-6">
+                    <!-- Tab 1: 基础数值 -->
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <h4 class="text-md font-semibold text-blue-800 mb-3">1. 基础概率设置 / Basics</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">基础胜率 (Base Win Rate)</label>
+                                <input type="number" step="0.01" id="inp_base_win_rate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm" placeholder="0.15">
+                                <p class="text-xs text-gray-500 mt-1">每次旋转的中奖概率 (0.0-1.0)</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">低注阈值 (Low Bet Threshold)</label>
+                                <input type="number" id="inp_low_bet_threshold" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm" placeholder="100">
+                                <p class="text-xs text-gray-500 mt-1">判定为低注的金额上限</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: 赔率分组权重 (NEW) -->
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                        <h4 class="text-md font-semibold text-yellow-800 mb-3">2. 赔率分组权重 / Outcome Weights</h4>
+                        <p class="text-xs text-gray-600 mb-2">设置各个赔率区间的出现权重 (数值越大出现概率越高)。总概率 = 某组权重 / 所有可用组权重之和。
+                        <br><b>注: 不中奖 (Loss) 由基础胜率单独决定，无需配置权重。</b></p>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- Group 1 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Group 1: < 5x</label>
+                                <input type="number" id="w_1" class="mt-1 block w-full border-gray-300 rounded shadow-sm p-1">
+                            </div>
+                            <!-- Group 2 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Group 2: 5x - 10x</label>
+                                <input type="number" id="w_2" class="mt-1 block w-full border-gray-300 rounded shadow-sm p-1">
+                            </div>
+                            <!-- Group 3 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Group 3: 10x - 20x</label>
+                                <input type="number" id="w_3" class="mt-1 block w-full border-gray-300 rounded shadow-sm p-1">
+                            </div>
+                            <!-- Group 4 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Group 4: 20x - 30x</label>
+                                <input type="number" id="w_4" class="mt-1 block w-full border-gray-300 rounded shadow-sm p-1">
+                            </div>
+                            <!-- Group 5 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Group 5: 30x - 50x</label>
+                                <input type="number" id="w_5" class="mt-1 block w-full border-gray-300 rounded shadow-sm p-1">
+                            </div>
+                            <!-- Group 6 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Group 6: ≥ 50x</label>
+                                <input type="number" id="w_6" class="mt-1 block w-full border-gray-300 rounded shadow-sm p-1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: RTP 控制表 -->
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <h4 class="text-md font-semibold text-indigo-800 mb-3">2. RTP 动态修正 / RTP Conditions</h4>
+                        <p class="text-xs text-gray-600 mb-2">当历史 RTP 低于左侧数值时，增加右侧的权重值。</p>
+                        <table class="min-w-full divide-y divide-gray-200 bg-white rounded-md overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">当前 RTP 上限 (Max RTP)</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">权重修正值 (Weight Val)</th>
+                                    <th class="px-4 py-2 w-10"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="rtp_table_body" class="divide-y divide-gray-200 text-sm">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                        <button onclick="addRtpRow()" class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium">+ 添加规则行</button>
+                    </div>
+
+                    <!-- Tab 3: 群组限制与权重 -->
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <h4 class="text-md font-semibold text-green-800 mb-3">3. 分组配置 / Group Config</h4>
+                        
+                        <!-- Special Groups -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">新手分组 (Newbie Groups)</label>
+                                <input type="text" id="inp_newbie_groups" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm" placeholder="e.g. 101,102,103">
+                                <p class="text-xs text-gray-500 mt-1">逗号分隔的 Group ID</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">低注分组 (Low Bet Groups)</label>
+                                <input type="text" id="inp_low_bet_groups" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm" placeholder="e.g. 201,202">
+                                <p class="text-xs text-gray-500 mt-1">逗号分隔，仅低注生效</p>
+                            </div>
+                        </div>
+
+                        <!-- VIP Config -->
+                        <div class="mb-4 bg-white p-3 rounded border border-gray-200">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">VIP 等级可用分组 (VIP Access)</label>
+                            <div class="grid grid-cols-1 gap-2 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-12 font-bold text-gray-500">VIP 0</span>
+                                    <input type="text" id="inp_vip_0" class="flex-1 border rounded px-2 py-1" placeholder="All">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-12 font-bold text-gray-500">VIP 1</span>
+                                    <input type="text" id="inp_vip_1" class="flex-1 border rounded px-2 py-1" placeholder="All">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-12 font-bold text-gray-500">VIP 2</span>
+                                    <input type="text" id="inp_vip_2" class="flex-1 border rounded px-2 py-1" placeholder="All">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-12 font-bold text-gray-500">VIP 3</span>
+                                    <input type="text" id="inp_vip_3" class="flex-1 border rounded px-2 py-1" placeholder="All">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-12 font-bold text-gray-500">VIP 4</span>
+                                    <input type="text" id="inp_vip_4" class="flex-1 border rounded px-2 py-1" placeholder="All">
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">留空表示允许访问所有组</p>
+                        </div>
+
+                        <!-- Group Weights -->
+                        <div class="hidden">
+                             <!-- Hidden old JSON input -->
+                            <label class="block text-sm font-medium text-gray-700">特定分组权重 (Group Weights)</label>
+                            <textarea id="inp_group_weights" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm font-mono" placeholder='{"1001": 5, "1002": 10}'></textarea>
+                            <p class="text-xs text-gray-500 mt-1">JSON格式: {"Group_ID": Weight}</p>
+                        </div>
+                    </div>
+
+                    <!-- Hidden JSON fallback for complex data not shown in UI -->
+                    <div class="hidden">
+                         <textarea id="configJson"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end px-4 py-3 gap-3 bg-gray-50 rounded-b-md mt-4">
+                    <button onclick="resetConfig()" class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">
+                        恢复默认 (Reset)
+                    </button>
+                    <button id="saveConfigBtn" onclick="saveAndCloseConfig()" class="px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700">
+                        确认保存 (Save)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultConfig = {
+            "base_win_rate": 0.15,
+            "loss_multiplier": 1.05,
+            "rtp_conditions": [
+                {"max": 0.50, "val": 500},
+                {"max": 0.70, "val": 400},
+                {"max": 0.80, "val": 320},
+                {"max": 0.95, "val": 220},
+                {"max": 0.98, "val": 100},
+                {"max": 0.99, "val": 60},
+                {"max": 1.00, "val": 50},
+                {"max": 999.0, "val": 50}
+            ],
+            "group_weights": {
+                "1": 150,
+                "2": 100,
+                "3": 80,
+                "4": 40,
+                "5": 20,
+                "6": 10
+            },
+            "vip_config": {"0": [], "1": [], "2": [], "3": [], "4": []},
+            "vip_config": {
+                "0": ["1", "2"], 
+                "1": ["1", "2", "3", "4"], 
+                "2": ["1", "2", "3", "4", "5"], 
+                "3": ["1", "2", "3", "4", "5", "6"], 
+                "4": []
+            },
+            "newbie_groups": ["1", "2", "3"],
+            "low_bet_groups": ["1", "2", "3", "4", "5", "6"],
+            "low_bet_threshold": 100
+        };
+
+        // Current config state
+        let currentConfig = JSON.parse(JSON.stringify(defaultConfig));
+
+        function initForm() {
+            // Fill basics
+            document.getElementById('inp_base_win_rate').value = currentConfig.base_win_rate;
+            // document.getElementById('inp_loss_multiplier').value = currentConfig.loss_multiplier; // Removed from HTML? No, removed logic for it earlier? Wait, check below.
+            // HTML still has loss multiplier input block? No I replaced tab 1.
+            document.getElementById('inp_low_bet_threshold').value = currentConfig.low_bet_threshold;
+
+            // Fill Weights (1-6) - 0 is gone
+            const gw = currentConfig.group_weights || {};
+            for(let i=1; i<=6; i++) {
+                const el = document.getElementById('w_'+i);
+                if(el) el.value = gw[i] !== undefined ? gw[i] : (defaultConfig.group_weights[i] || 0);
+            }
+            
+            // Fill Groups
+            document.getElementById('inp_newbie_groups').value = (currentConfig.newbie_groups || []).join(',');
+            document.getElementById('inp_low_bet_groups').value = (currentConfig.low_bet_groups || []).join(',');
+            
+            // Fill VIP
+            const vip = currentConfig.vip_config || {};
+            for(let i=0; i<=4; i++) {
+                document.getElementById('inp_vip_'+i).value = (vip[i] || []).join(',');
+            }
+
+            // Fill RTP Table
+            const tbody = document.getElementById('rtp_table_body');
+            tbody.innerHTML = '';
+            (currentConfig.rtp_conditions || []).forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-2">
+                        <input type="number" step="0.01" class="w-24 border rounded px-2 py-1 rtp-max" value="${item.max}">
+                    </td>
+                    <td class="px-4 py-2">
+                        <input type="number" class="w-24 border rounded px-2 py-1 rtp-val" value="${item.val}">
+                    </td>
+                    <td class="px-4 py-2 text-center clickable" onclick="removeRtpRow(this)">
+                        <span class="text-red-500 cursor-pointer font-bold">&times;</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addRtpRow() {
+            const tbody = document.getElementById('rtp_table_body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-4 py-2">
+                    <input type="number" step="0.01" class="w-24 border rounded px-2 py-1 rtp-max" value="0.90">
+                </td>
+                <td class="px-4 py-2">
+                    <input type="number" class="w-24 border rounded px-2 py-1 rtp-val" value="100">
+                </td>
+                <td class="px-4 py-2 text-center clickable" onclick="removeRtpRow(this)">
+                    <span class="text-red-500 cursor-pointer font-bold">&times;</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function removeRtpRow(el) {
+            el.parentElement.remove();
+        }
+
+        function toggleConfigModal() {
+            const modal = document.getElementById('configModal');
+            if (modal.classList.contains('hidden')) {
+                // Opening default init
+                initForm();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+        
+        function saveAndCloseConfig() {
+            // Gather basics
+            currentConfig.base_win_rate = parseFloat(document.getElementById('inp_base_win_rate').value) || 0.15;
+            currentConfig.low_bet_threshold = parseInt(document.getElementById('inp_low_bet_threshold').value) || 100;
+
+            // Gather Weights 1-6
+            currentConfig.group_weights = {};
+            for(let i=1; i<=6; i++) {
+                const el = document.getElementById('w_'+i);
+                if(el) currentConfig.group_weights[i] = parseInt(el.value) || 0;
+            }
+            // Ensure 0 (Loss) is in weights if needed by backend, though backend handles it via base_win_rate now.
+            // But let's set it to 0 or something so it doesn't crash if read.
+            currentConfig.group_weights["0"] = 0; 
+
+            // Gather Groups
+            const parseList = (str) => str.split(',').map(s => s.trim()).filter(s => s !== "");
+            currentConfig.newbie_groups = parseList(document.getElementById('inp_newbie_groups').value);
+            currentConfig.low_bet_groups = parseList(document.getElementById('inp_low_bet_groups').value);
+
+            // Gather VIP
+            currentConfig.vip_config = {};
+            for(let i=0; i<=4; i++) {
+                currentConfig.vip_config[i.toString()] = parseList(document.getElementById('inp_vip_'+i).value);
+            }
+
+            // Gather RTP table
+            const rows = document.querySelectorAll('#rtp_table_body tr');
+            const newConditions = [];
+            rows.forEach(row => {
+                const max = parseFloat(row.querySelector('.rtp-max').value);
+                const val = parseInt(row.querySelector('.rtp-val').value);
+                if (!isNaN(max) && !isNaN(val)) {
+                    newConditions.push({ max, val });
+                }
+            });
+            // Sort by max just in case
+            newConditions.sort((a, b) => a.max - b.max);
+            currentConfig.rtp_conditions = newConditions;
+
+            // Close
+            document.getElementById('configModal').classList.add('hidden');
+        }
+        
+
+
+        function resetConfig() {
+            currentConfig = JSON.parse(JSON.stringify(defaultConfig));
+            initForm();
+        }
+
+        async function runSim() {
+            const btn = document.getElementById('runBtn');
+            const icon = document.getElementById('loadingIcon');
+            
+            // Use currentConfig object directly
+            const strConfig = currentConfig;
+            
+            // Set Loading state
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            icon.classList.remove('hidden');
+            
+            const payload = {
+                game_file: document.getElementById('gameFile').value,
+                spins: document.getElementById('spins').value,
+                num_users: document.getElementById('num_users').value,
+                initial_balance: document.getElementById('initial_balance').value,
+                bet: document.getElementById('bet').value,
+                vip_level: document.getElementById('vip_level').value,
+                strategy_config: strConfig
+            };
+
+            try {
+                const response = await fetch('/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('模拟出错: ' + data.error);
+                    return;
+                }
+
+                // Update Stats
+                const stats = data.stats;
+                document.getElementById('statRtp').textContent = (stats.rtp * 100).toFixed(2) + '%';
+                document.getElementById('statWagered').textContent = stats.total_wagered.toLocaleString();
+                document.getElementById('statWon').textContent = stats.total_won.toLocaleString();
+                
+                const deltaElem = document.getElementById('statDelta');
+                deltaElem.textContent = (stats.delta > 0 ? '+' : '') + stats.delta.toLocaleString();
+                deltaElem.className = stats.delta >= 0 ? 'font-bold text-green-600' : 'font-bold text-red-600';
+                
+                document.getElementById('resultStats').classList.remove('hidden');
+                
+                // Show Detailed Stats Header
+                document.getElementById('detailedStatsHeader').classList.remove('hidden');
+                
+                // Fill details if available
+                if (stats.details) {
+                     const d = stats.details;
+                     document.getElementById('stat_hit_rate').textContent = (d.hit_rate * 100).toFixed(2) + "%";
+                     document.getElementById('stat_volatility').textContent = d.volatility.toFixed(4);
+                     document.getElementById('stat_max_dd').textContent = d.max_drawdown.toLocaleString();
+                     document.getElementById('stat_avg_win').textContent = d.avg_win_mult.toFixed(2) + "x";
+                     document.getElementById('stat_big_wins').textContent = d.big_wins.toLocaleString();
+                     document.getElementById('stat_max_win').textContent = d.max_win_mult.toFixed(2) + "x";
+                }
+
+                // Hide Placeholders
+                document.getElementById('chartBalancePlaceholder').classList.add('hidden');
+                document.getElementById('chartRtpPlaceholder').classList.add('hidden');
+                document.getElementById('chartDistPlaceholder').classList.add('hidden');
+
+                // Render Charts
+                renderCharts(data.chart_data);
+
+            } catch (e) {
+                console.error(e);
+                alert('请求仿真服务失败');
+            } finally {
+                // Reset State
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                icon.classList.add('hidden');
+            }
+        }
+        
+        // --- Chart.js Logic ---
+        let charts = { balance: null, rtp: null, dist: null, zoom: null };
+        let lastChartData = null; // Store for zoom
+
+        function renderCharts(data) {
+            lastChartData = data;
+            
+            // 1. Balance
+            const ctxB = document.getElementById('chartBalance').getContext('2d');
+            if(charts.balance) charts.balance.destroy();
+            charts.balance = new Chart(ctxB, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Balance',
+                        data: data.balance,
+                        borderColor: '#3b82f6',
+                        borderWidth: 1.5,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    // Custom Tooltip: Spin, Balance, RTP, Group
+                                    const idx = ctx.dataIndex;
+                                    const rtpVal = data.rtp[idx];
+                                    const grp = data.groups ? data.groups[idx] : '';
+                                    
+                                    // Map group ID to label if needed, or just show ID
+                                    let grpLabel = grp == 0 ? "Loss" : ("Win Group " + grp);
+                                    if(grp === "" || grp === undefined) grpLabel = "N/A";
+                                    
+                                    return [
+                                        `Balance: ${ctx.parsed.y.toLocaleString()}`,
+                                        `RTP: ${(rtpVal*100).toFixed(2)}%`,
+                                        `Outcome: ${grpLabel}`
+                                    ];
+                                }
+                            }
+                        },
+                        title: { display: false }
+                    },
+                    scales: {
+                        x: { display: false }, // Hide x axis labels for cleanliness if dense
+                        y: { beginAtZero: false } 
+                    }
+                }
+            });
+            
+            // 2. RTP
+             const ctxR = document.getElementById('chartRtp').getContext('2d');
+            if(charts.rtp) charts.rtp.destroy();
+            charts.rtp = new Chart(ctxR, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'RTP',
+                        data: data.rtp,
+                        borderColor: '#f59e0b',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false } }
+                }
+            });
+            
+            // 3. Dist
+             const ctxD = document.getElementById('chartDist').getContext('2d');
+            if(charts.dist) charts.dist.destroy();
+            charts.dist = new Chart(ctxD, {
+                type: 'bar',
+                data: {
+                    labels: data.dist.labels,
+                    datasets: [{
+                        label: 'Count',
+                        data: data.dist.data,
+                        backgroundColor: '#10b981',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                         y: { type: 'logarithmic' }
+                    }
+                }
+            });
+        }
+        
+        // Zoom functionality
+        function zoomChart(type) {
+            if(!lastChartData) return;
+            const modal = document.getElementById('zoomModal');
+            modal.style.display = "block";
+            
+            const ctxZ = document.getElementById('zoomedCanvas').getContext('2d');
+            if(charts.zoom) charts.zoom.destroy();
+            
+            let config = {};
+            // Clone config based on type but make it bigger/detailed
+            if(type === 'balance') {
+                config = {
+                    type: 'line',
+                    data: {
+                        labels: lastChartData.labels,
+                        datasets: [{
+                            label: 'Balance',
+                            data: lastChartData.balance,
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                         responsive: true,
+                         maintainAspectRatio: false,
+                         interaction: { mode: 'index', intersect: false },
+                         plugins: {
+                             tooltip: {
+                                callbacks: {
+                                    title: (items) => `Spin ${items[0].label}`,
+                                    label: function(ctx) {
+                                        const idx = ctx.dataIndex;
+                                        const rtpVal = lastChartData.rtp[idx];
+                                        const grp = lastChartData.groups ? lastChartData.groups[idx] : '';
+                                        let grpLabel = grp == 0 ? "Loss" : ("Win Group " + grp);
+                                        return [
+                                            `Balance: ${ctx.parsed.y.toLocaleString()}`,
+                                            `RTP: ${(rtpVal*100).toFixed(2)}%`,
+                                            `Outcome: ${grpLabel}`
+                                        ];
+                                    }
+                                }
+                             }
+                         }
+                    }
+                };
+            } else if (type === 'rtp') {
+                 config = {
+                    type: 'line',
+                    data: {
+                        labels: lastChartData.labels,
+                        datasets: [{
+                            label: 'RTP',
+                            data: lastChartData.rtp,
+                            borderColor: '#f59e0b',
+                            borderWidth: 1,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                };
+            } else if (type === 'dist') {
+                config = {
+                     type: 'bar',
+                    data: {
+                        labels: lastChartData.dist.labels,
+                        datasets: [{
+                            label: 'Frequency',
+                            data: lastChartData.dist.data,
+                             backgroundColor: '#10b981',
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: { y: { type: 'logarithmic' } }
+                    }
+                };
+            }
+            
+            charts.zoom = new Chart(ctxZ, config);
+        }
+        
+        function closeZoom() {
+            document.getElementById('zoomModal').style.display = "none";
+            if(charts.zoom) {
+                charts.zoom.destroy();
+                charts.zoom = null;
+            }
+        }
+        
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('zoomModal');
+            if (event.target == modal) {
+                closeZoom();
+            }
+        }
+    </script>
+</body>
+</html>
