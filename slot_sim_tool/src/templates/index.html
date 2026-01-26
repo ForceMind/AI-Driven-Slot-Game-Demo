@@ -259,6 +259,11 @@
                                 <p class="text-xs text-gray-500 mt-1">每次旋转的中奖概率 (0.0-1.0)</p>
                             </div>
                             <div>
+                                <label class="block text-sm font-medium text-gray-700">亏损补偿系数 (Loss Multiplier)</label>
+                                <input type="number" step="0.01" id="inp_loss_multiplier" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm" placeholder="1.05">
+                                <p class="text-xs text-gray-500 mt-1">连输时的胜率放大参数</p>
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">低注阈值 (Low Bet Threshold)</label>
                                 <input type="number" id="inp_low_bet_threshold" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 text-sm" placeholder="100">
                                 <p class="text-xs text-gray-500 mt-1">判定为低注的金额上限</p>
@@ -402,6 +407,7 @@
         const defaultConfig = {
             "base_win_rate": 0.15,
             "loss_multiplier": 1.05,
+            "rtp_compensation": 1.0,
             "rtp_conditions": [
                 {"max": 0.50, "val": 500},
                 {"max": 0.70, "val": 400},
@@ -439,8 +445,12 @@
         function initForm() {
             // Fill basics
             document.getElementById('inp_base_win_rate').value = currentConfig.base_win_rate;
-            // document.getElementById('inp_loss_multiplier').value = currentConfig.loss_multiplier; // Removed from HTML? No, removed logic for it earlier? Wait, check below.
-            // HTML still has loss multiplier input block? No I replaced tab 1.
+            const lossEl = document.getElementById('inp_loss_multiplier');
+            if(lossEl) lossEl.value = currentConfig.loss_multiplier;
+            
+            const rtpCompEl = document.getElementById('inp_rtp_compensation');
+            if(rtpCompEl) rtpCompEl.value = currentConfig.rtp_compensation || 1.0;
+
             document.getElementById('inp_low_bet_threshold').value = currentConfig.low_bet_threshold;
 
             // Fill Weights (1-6) - 0 is gone
@@ -515,6 +525,12 @@
         function saveAndCloseConfig() {
             // Gather basics
             currentConfig.base_win_rate = parseFloat(document.getElementById('inp_base_win_rate').value) || 0.15;
+            const lossEl = document.getElementById('inp_loss_multiplier');
+            if(lossEl) currentConfig.loss_multiplier = parseFloat(lossEl.value) || 1.05;
+
+            const rtpCompEl = document.getElementById('inp_rtp_compensation');
+            if(rtpCompEl) currentConfig.rtp_compensation = parseFloat(rtpCompEl.value) || 1.0;
+            
             currentConfig.low_bet_threshold = parseInt(document.getElementById('inp_low_bet_threshold').value) || 100;
 
             // Gather Weights 1-6
